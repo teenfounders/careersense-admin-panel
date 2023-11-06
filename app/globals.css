@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+ .ProseMirror{
+  outline: none;
+ }
+
+body {
+   padding: 0;
+   margin: 0;
+   box-sizing: border-box;
+}
+
+ .custom-checkbox:checked {
+  border-color: #CBD5E0; /* Set your desired gray-300 color code here */
+}
+   .dropdown-container select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    
+    background: url('../assets/downarrow.svg') no-repeat right center;
+}
+
+
+input:invalid[data-focused='true'] ~ span{
+  display: flex; 
+}
+/* input:invalid[data-focused='true'] {
+  border: 2px solid red;
+} */
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+/* For IE, Edge and Firefox */
+.scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+.mainsticky{
+  position: sticky;
+  top: 0;
+}
+.nav-link {
+  @apply h-[2.187rem] border-[1px] border-black rounded-md my-1 mr-2 font-medium py-1 px-3
+
+}
+.card-button {
+  @apply h-[2.187rem] hover:-translate-y-1 transition ease-in-out duration-100  flex border-[1px] border-[#0e0e0e] rounded-[4px] font-semibold py-0 px-4
+
+}
+
+.section-card--hr {
+    background: #dadada;
+    width: auto;
+    width: initial;
+    margin: 0.9375rem calc(-0.9375rem);
+} 

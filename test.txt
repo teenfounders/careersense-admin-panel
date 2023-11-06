@@ -1,0 +1,716 @@
+"use client";
+import AppPostButton from "@/components/AppPostButton";
+import { postdata } from "@/utils/postdata";
+import React from "react";
+import Image from "next/image";
+import Link from "next/link";
+// import React, { ChangeEvent } from "react";
+import { IoChevronBackOutline } from "react-icons/io5";
+import heart from "@/assets/heart.svg";
+import dots from "@/assets/3dot.svg";
+import message from "@/assets/message.svg";
+import cross from "@/assets/corss2.svg";
+import bell from "@/assets/bell.svg";
+import { FaArrowDown, FaSortDown } from "react-icons/fa";
+import { BsChevronDown } from "react-icons/bs";
+import { dot } from "node:test/reporters";
+import AppTextarea from "@/components/AppTextarea";
+import AppInput from "@/components/AppInput";
+// import AppInput from "./AppInput";
+interface Skill {
+  id: number;
+  name: string;
+}
+
+interface Post {
+  id: number;
+  name: string;
+  university: string;
+  graduationYear: number;
+  location: string;
+  date: string;
+  views: number;
+  content: string;
+  // skills: Skill[];
+  linkedin: string;
+  email: string;
+}
+
+interface PostProps {
+  posts: Post[];
+}
+const postId = ({ params }: { params: { post: number } }) => {
+  const selectedPost = postdata.find((post) => post.id === Number(params.post));
+
+  if (!selectedPost) {
+    return <div>Post not found</div>;
+  }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    console.log(e.target.value);
+  };
+  return (
+    <div className="flex h-screen gap-12 overflow-y-auto ">
+      <div className="flex flex-1 relative flex-shrink-1 basis-[66%] w-full max-xl:basis-full max-xl:flex-shrink max-xl:w-full   min-h-screen justify-start items-start flex-col">
+        <div className="sticky min-w-[66%] bg-white mt-0 top-0 left-0 h-[4rem] z-50 flex items-center cursor-pointer py-5 px-8">
+          {/* <div className="h-16 space-x-3 shadow-md bg-white flex justify-start pl-16 items-center fixed z-50 top-0 "> */}
+          <IoChevronBackOutline />
+          back
+        </div>
+        {/* this is heading back */}
+        <div className="rounded-none my-0  pt-3 min-h-screen">
+          <div className="max-w-3xl flex gap-3 bg-white my-0 mx-auto rounded-2xl px-6 py-8 overflow-hidden relative">
+            {/* <div className="flex  relative pt-20 px-[80px] h-y-auto   bg-white  gap-5"> */}
+            <div className="w-[2.56rem] h-[2.56rem] rounded-full justify-center items-center bg-green-100 ">
+              <span className="p-2 font-semibold text-[#25b2aa] flex items-center justify-center">
+                SB
+              </span>
+            </div>
+            {/* main content  */}
+            <div className=" ">
+              {/* <div className=" flex flex-col gap-10"> */}
+              <Link
+                key={selectedPost.id}
+                href={`/discover/post/${selectedPost.id}`}
+              >
+                <div className="mb-6 flex w-full gap-2 justify-between">
+                  <div>
+                    <p className="text-xs font-semibold">
+                      {selectedPost.name} <span>in</span>{" "}
+                      <Link
+                        href={"/discover/communities"}
+                        className="hover:underline"
+                      >
+                        {selectedPost.community}
+                      </Link>
+                    </p>
+                    <p className=" font-normal text-xs text-[#666] ">
+                      {selectedPost.university}, Class of{" "}
+                      {selectedPost.graduationYear}
+                      {selectedPost.location} · {selectedPost.date} ·{" "}
+                      {selectedPost.views} Views
+                    </p>
+                  </div>
+                  <Image src={dots} width={15} height={15} alt={"image"} />
+                </div>
+                <p className="text-[#0E0E0E] text-sm leading-6 mb-2 font-normal">
+                  {selectedPost.content}
+                </p>
+              </Link>
+              <div className="flex gap-2 ">
+                <AppPostButton
+                  classname="hover:scale-105 py-2 px-4"
+                  icon={heart}
+                  label={"Like"}
+                />
+                <AppPostButton
+                  icon={message}
+                  classname="hover:scale-105 py-2 px-4"
+                  label={"message"}
+                />
+                <AppPostButton
+                  classname="hover:scale-105 py-2 px-4"
+                  icon={bell}
+                  label={"Follow"}
+                />
+              </div>
+            </div>
+          </div>
+          {/* comment tag */}
+          <div className="sticky bottom-0 w-full py-6 shadow-2xl rounded-e-lg bg-white px-8 z-10">
+            <div className=" mb-3 flex justify-between   ">
+              <span className=" justify-center gap-2 items-center flex">
+                {" "}
+                <div className="w-[2.56rem] h-[2.56rem] rounded-full justify-left items-center bg-green-100 ">
+                  <span className="p-2 font-semibold text-[#25b2aa] flex items-center justify-center">
+                    SB
+                  </span>
+                </div>{" "}
+                <span className="text-md">{selectedPost.name}</span>
+              </span>
+              <Image
+                alt={"cross"}
+                width={20}
+                height={20}
+                className="invert text-gray-500"
+                src={cross}
+              />
+            </div>
+            <div className="bg-gray-100 rounded-2xl  h-full">
+              <div className="h-28 border-none w-full overflow-y-auto pt-3 pb-5 px-2">
+                <input
+                  type="text"
+                  placeholder="Leave a comment"
+                  className="text-black border-none focus:border-none placeholder:text-gray-400 bg-transparent "
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* right side trending div */}
+      <div className="min-w-[207px] mr-12 flex flex-col justify-center items-center p-3 h-[60px] bg-white">
+        Tending
+      </div>
+    </div>
+  );
+};
+
+export default postId;
+
+
+
+
+
+
+sidebar 
+"use client";
+import React, { useContext, useState } from "react";
+import lock from "@/assets/lock.svg";
+import company from "@/assets/company.svg";
+import events from "@/assets/event.svg";
+import job from "@/assets/job.svg";
+import homeimg from "@/assets/homeimg.svg";
+import settings from "@/assets/settings.svg";
+import remoteworks from "@/assets/removework.png";
+import mice from "@/assets/mice.png";
+import generaladvice from "@/assets/general-advice.png";
+import logoimage from "@/assets/logoimg.png";
+import community from "@/assets/Community.svg";
+import logo from "@/assets/brand-logo-combined.svg";
+import Link from "next/link";
+import Image from "next/image";
+import bell from "@/assets/bell.svg";
+import Search from "@/assets/searchgray.svg";
+
+import { useSelectedLayoutSegment } from "next/navigation";
+import AppSearchInput from "./AppSearchInput";
+import { MenuContext } from "@/context/MenuContext";
+export const dummyItems: string[] = [
+  "Team @ Untapped",
+  "Item 2",
+  "Another Item",
+  "More Items",
+  "Sample Item",
+  "Test Item",
+  // Add more items as needed
+];
+function classNames(...classes: string[]) {
+  return classes.filter(Boolean).join(" ");
+}
+const Sidebar = () => {
+  const { open } = useContext(MenuContext);
+  const segment = useSelectedLayoutSegment();
+  const [selectedItem, setSelectedItem] = useState<string>("");
+  const sidebarOptions = [
+    {
+      name: "Home",
+      href: "/discover",
+      icon: homeimg,
+      current: !segment ? true : false,
+    },
+    {
+      name: "Jobs",
+      href: "/discover/jobs",
+      icon: job,
+      current: `/${segment}` == "/jobs" ? true : false,
+    },
+    {
+      name: "Events",
+      href: "/discover/events",
+      icon: events,
+      current: `/${segment}` == "/events" ? true : false,
+    },
+    {
+      name: "Companies",
+      href: "/discover/companies",
+      icon: company,
+      current: `/${segment}` == "/companies" ? true : false,
+    },
+    {
+      name: "Sammed",
+      href: "/discover/me",
+      icon: homeimg,
+      current: `/${segment}` == "/me" ? true : false,
+    },
+    // {
+    //   name: "All Posts",
+    //   href: "/discover/jobs",
+    //   icon: generaladvice,
+    //   current: `/${segment}` == "/communities" ? true : false,
+    // },
+  ];
+  const sidebarCommunity = [
+    {
+      name: "All Post",
+      href: "/discover/post",
+      icon: community,
+
+      current: `/${segment}` == "/communities" ? true : false,
+    },
+    {
+      name: "General Post",
+      href: "/discover/communities/:id",
+      icon: generaladvice,
+      // current: `/${segment}` == "/communities/:id" ? true : false,
+    },
+    {
+      name: "Recruiter Announcements",
+      href: "/discover/communities/:id",
+      icon: mice,
+      // current: `/${segment}` == "/communities" ? true : false,
+    },
+    {
+      name: "Remote Work",
+      href: "/discover/communitie/:id",
+      icon: remoteworks,
+      // current: `/${segment}` == "/companies" ? true : false,
+    },
+
+    // {
+    //   name: "All Posts",
+    //   href: "/discover/jobs",
+    //   icon: generaladvice,
+    //   current: `/${segment}` == "/communities" ? true : false,
+    // },
+  ];
+  // console.log(open);
+  const handleSelectSearch = (selectedItem: string) => {
+    // Do something with the selected item
+    setSelectedItem(selectedItem);
+  };
+
+  return (
+    <div className="">
+      <div
+        className={`${
+          open ? "flex fixed left-0 " : "hidden"
+        } transation ease-linear delay-300  relative flex-none lg:fixed lg:inset-y-0 lg:flex h-screen lg:w-[280px] lg:flex-col `}
+      >
+        {/* <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4 border-r-2"> */}
+        <div className="flex grow flex-col min-h-screen    pb-4 border-r-2 scrollbar-hide  ">
+          <div className="flex sticky left-0 h-[64px] bg-white top-0 px-4 justify-between border-b-[1px] border-gray-200  shrink-0 items-center">
+            <Image src={logo} width={100} height={45} alt="logo" className="" />
+            <span className="flex space-x-3">
+              <Link href={"/discover/settings"}>
+                <Image
+                  src={settings}
+                  width={18}
+                  height={18}
+                  alt="settings"
+                  className="text-3xl font-bold"
+                />
+              </Link>
+              <Image
+                src={bell}
+                width={18}
+                height={18}
+                alt="settings"
+                className="text-3xl font-bold"
+              />
+            </span>
+          </div>
+          <nav className="flex flex-1 flex-col h-screen overflow-y-auto scrollbar-hide">
+            <ul role="list" className="flex flex-1 bg-white flex-col gap-y-9">
+              {/* <li className={` ${open ? "lg:block" : "hidden"}  `}> */}
+              <li className="hidden  lg:block">
+                <ul role="list" className=" space-y-1">
+                  {sidebarOptions.map((option) => (
+                    <li
+                      key={option.name}
+                      className={classNames(
+                        option.current ? "border-l-2 border-black" : ""
+                      )}
+                    >
+                      <Link
+                        className={classNames(
+                          option.current
+                            ? "bg-gray-200 "
+                            : // ? "bg-gray-200 border-l-4 text  border-black"
+                              "",
+                          "group flex px-7 gap-x-4 rounded-md p-2 text-sm leading-8 font-normal"
+                        )}
+                        href={option.href}
+                      >
+                        <Image
+                          src={option.icon}
+                          width={20}
+                          height={16}
+                          alt={option.name}
+                        />
+                        {option.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                <ul>
+                  <h1 className="font-light leading-8 px-3 pt-6 pb-3">
+                    DIRECT MESSAGES
+                  </h1>
+                  <span className="relative">
+                    <span
+                      className="absolute left-5"
+                      style={{
+                        top: `calc(30% - 0px)`, // 10px is half of the image height (20px / 2)
+                      }}
+                    >
+                      <Image
+                        src={Search}
+                        className="filter-gray"
+                        width={15}
+                        height={15}
+                        alt="image"
+                      />
+                    </span>
+                    <AppSearchInput
+                      label=""
+                      placeholder="Company"
+                      value={selectedItem}
+                      // error={error}
+                      classname=" w-11/12 pl-10 border-gray-200 mx-3 items-center rounded-full h-[38px]"
+                      items={dummyItems}
+                      onSelect={handleSelectSearch}
+                    />
+                  </span>
+                  <span className="flex justify-start  space-x-2 px-2 py-3">
+                    <Image
+                      src={logoimage}
+                      className="filter-gray"
+                      width={23}
+                      height={18}
+                      alt="image"
+                    />
+                    <p className="font-medium">Team @ untapped</p>
+                  </span>
+                </ul>
+              </li>
+
+              <ul role="list" className="-mx-2 space-y-1">
+                {sidebarCommunity.map((option) => (
+                  <li
+                    key={option.name}
+                    className={classNames(
+                      option.current ? "border-l-4 border-black " : ""
+                    )}
+                  >
+                    <Link
+                      className={classNames(
+                        option.current
+                          ? "bg-gray-200 "
+                          : // ? "bg-gray-200 border-l-4 text  border-black"
+                            "",
+                        "group flex px-6 gap-x-4 rounded-e-md p-2 text-sm leading-8 font-normal"
+                      )}
+                      href={option.href}
+                    >
+                      <Image
+                        src={option.icon}
+                        width={28}
+                        height={18}
+                        alt={option.name}
+                      />
+                      {option.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Sidebar;
+
+
+
+//
+this is the talent protocol page 
+
+"use client";
+
+import React from "react";
+import Image from "next/image";
+import { animate, motion } from "framer-motion";
+import {
+  buttonfade,
+  logowithfade,
+  mainparagraph,
+  profileImage,
+  staggerChildren,
+  wordAnimation,
+} from "@/utils/animation";
+
+type Props = {};
+
+const page = (props: Props) => {
+  return (
+    <motion.div className="" initial="initial" animate="animate">
+      <header className="bg-[#fafafb] h-screen overflow-hidden">
+        <div className="px-[10%]">
+          <div className="mx-auto w-full max-w-[100rem]">
+            <div className="main-scrollermotion">
+              <div
+                className=" 
+          main-left
+             "
+              >
+                <div className=" flex flex-col gap-12 justify-start items-start w-full">
+                  <div className="mt-12 min-h-44">
+                    <motion.div className="" variants={logowithfade}>
+                      <Image
+                        src={
+                          "https://www.talentprotocol.com/images/talent-protocol-logo-light.svg"
+                        }
+                        width={180}
+                        height={100}
+                        alt={"image"}
+                        className=""
+                      />
+                    </motion.div>
+                  </div>
+                  <div className="self-center mt-16">
+                    <div className="flex flex-col">
+                      <div className="mb-0 mx-0 ">
+                        <motion.h2 className="text-[#1c2126] block mt-0 mb-0 text-[3.5rem] font-medium leading-1">
+                          <span className="block h-auto text-start w-full">
+                            <AnimatedWords title="You &lsquo;ll never build alone." />
+                          </span>
+                        </motion.h2>
+                      </div>
+                      <motion.p
+                        variants={mainparagraph}
+                        className="text-[#536471] text-xl font-normal  leading-6"
+                      >
+                        Where builders commit to goals, share their progress and
+                        find the support they need to succeed.
+                      </motion.p>
+                    </div>
+
+                    <div className="my-8">
+                      <motion.div
+                        initial={{ y: 0, scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ delay: 2, duration: 0.5 }}
+                        variants={buttonfade}
+                        className="flex flex-wrap gap-2 items-center "
+                      >
+                        <motion.button className="py-[0.8rem] px-6 text-[#fff] font-semibold rounded-full bg-[#7857ed]">
+                          Create account
+                        </motion.button>
+                        <motion.button className="py-[0.8rem] px-6  font-semibold rounded-full ">
+                          Log in
+                        </motion.button>
+                      </motion.div>
+                    </div>
+                  </div>
+                  <motion.div variants={profileImage} className="">
+                    <div className="mb-4">
+                      Join +6,000 builders who already achieved their goals.
+                    </div>
+                    <motion.div className="mb-20 flex gap-3">
+                      <div className="">
+                        <Image
+                          src={
+                            "https://talentprotocol-mvp.s3.eu-west-2.amazonaws.com/f0bbbec24b20f9e7b74ea3cffa93e08c.jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAUTLBVWPO6V765TV7%2F20231026%2Feu-west-2%2Fs3%2Faws4_request&X-Amz-Date=20231026T113537Z&X-Amz-Expires=900&X-Amz-SignedHeaders=host&X-Amz-Signature=70cb0eb55b2257768efa53c929e07698c0a59d1d35b0010028aaa5ef81801f5e"
+                          }
+                          width={180}
+                          height={100}
+                          alt={"image"}
+                          className="rounded-full w-[3.5rem]"
+                        />
+                      </div>
+                      <div className="">
+                        <Image
+                          src={
+                            "https://talentprotocol-mvp.s3.eu-west-2.amazonaws.com/f0bbbec24b20f9e7b74ea3cffa93e08c.jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAUTLBVWPO6V765TV7%2F20231026%2Feu-west-2%2Fs3%2Faws4_request&X-Amz-Date=20231026T113537Z&X-Amz-Expires=900&X-Amz-SignedHeaders=host&X-Amz-Signature=70cb0eb55b2257768efa53c929e07698c0a59d1d35b0010028aaa5ef81801f5e"
+                          }
+                          width={180}
+                          height={100}
+                          alt={"image"}
+                          className="rounded-full w-[3.5rem]"
+                        />
+                      </div>
+                      <div className="">
+                        <Image
+                          src={
+                            "https://talentprotocol-mvp.s3.eu-west-2.amazonaws.com/f0bbbec24b20f9e7b74ea3cffa93e08c.jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAUTLBVWPO6V765TV7%2F20231026%2Feu-west-2%2Fs3%2Faws4_request&X-Amz-Date=20231026T113537Z&X-Amz-Expires=900&X-Amz-SignedHeaders=host&X-Amz-Signature=70cb0eb55b2257768efa53c929e07698c0a59d1d35b0010028aaa5ef81801f5e"
+                          }
+                          width={180}
+                          height={100}
+                          alt={"image"}
+                          className="rounded-full w-[3.5rem]"
+                        />
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                </div>
+              </div>
+              {/* <div className=" bg-green-400 h-screen  max-w-3xl grid grid-cols-1 grid-rows-auto grid-flow-column grid-auto-columns-1fr gap-x-1rem">
+                <div className=""></div>
+                <div className="w-full gap-x-4 flex-row flex items-center ">
+                  <div className="w-full h-screen  flex-row grow shrink basis-0 justify-center flex relative overflow-hidden items-start">
+                    <div className="absolute whitespace-no-wrap animate-marquee-vertical ">
+                      <div className="w-full h-full gap-x-4 gap-y-4 flex-col flex justify-start items-start ">
+                        <motion.div className=" absolute whitespace-no-wrap animate-marquee">
+                          <div className="transform w-52 transition-transform duration-200 border-[1.5px] border-[#dadde1] rounded-2xl shadow-md">
+                            <Image
+                              src={
+                                "https://www.talentprotocol.com/images/talent-protocol-goal-card-left00001-p-500.jpg"
+                              }
+                              width={100}
+                              height={100}
+                              className="min-w-full w-52 inline-block "
+                              alt="profile"
+                            />
+                          </div>
+                          <div className="transform w-52 transition-transform duration-200 border-[1.5px] border-[#dadde1] rounded-2xl shadow-md">
+                            <Image
+                              src={
+                                "https://www.talentprotocol.com/images/talent-protocol-goal-card-left00001-p-500.jpg"
+                              }
+                              width={100}
+                              height={100}
+                              className="min-w-full inline-block "
+                              alt="profile"
+                            />
+                          </div>
+                          <div className="transform w-52 transition-transform duration-200 border-[1.5px] border-[#dadde1] rounded-2xl shadow-md">
+                            <Image
+                              src={
+                                "https://www.talentprotocol.com/images/talent-protocol-goal-card-left00001-p-500.jpg"
+                              }
+                              width={100}
+                              height={100}
+                              className="min-w-full inline-block "
+                              alt="profile"
+                            />
+                          </div>
+                        </motion.div>
+                        <motion.div className="absolute whitespace-no-wrap">
+                          <div className="transform w-52 transition-transform duration-200 border-[1.5px] border-[#dadde1] rounded-2xl shadow-md">
+                            <Image
+                              src={
+                                "https://www.talentprotocol.com/images/talent-protocol-goal-card-left00001-p-500.jpg"
+                              }
+                              width={100}
+                              height={100}
+                              className="min-w-full w-52 inline-block "
+                              alt="profile"
+                            />
+                          </div>
+                          <div className="transform w-52 transition-transform duration-200 border-[1.5px] border-[#dadde1] rounded-2xl shadow-md">
+                            <Image
+                              src={
+                                "https://www.talentprotocol.com/images/talent-protocol-goal-card-left00001-p-500.jpg"
+                              }
+                              width={100}
+                              height={100}
+                              className="min-w-full inline-block "
+                              alt="profile"
+                            />
+                          </div>
+                          <div className="transform w-52 transition-transform duration-200 border-[1.5px] border-[#dadde1] rounded-2xl shadow-md">
+                            <Image
+                              src={
+                                "https://www.talentprotocol.com/images/talent-protocol-goal-card-left00001-p-500.jpg"
+                              }
+                              width={100}
+                              height={100}
+                              className="min-w-full inline-block "
+                              alt="profile"
+                            />
+                          </div>
+                        </motion.div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div> */}
+              <div className="bg-green-400 h-screen max-w-3xl grid grid-cols-1 -mr-60 grid-rows-auto grid-flow-column grid-auto-columns-1fr gap-x-1rem">
+                {/* <div className=""></div> */}
+                <div className="w-full gap-x-4 flex-row flex items-center relative overflow-hidden">
+                  <div className="absolute whitespace-no-wrap animate-marquee">
+                    {[...Array(100)].map((_, index) => (
+                      <motion.div
+                        key={index}
+                        className="transform w-52 transition-transform duration-200 border-[1.5px] border-[#dadde1] rounded-2xl shadow-md mb-4"
+                        // initial={{ translateY: 0 }}
+                        // animate={{ translateY: "-100%" }}
+                        // transition={{
+                        //   duration: 2,
+                        //   ease: "linear",
+                        //   repeat: Infinity,
+                        // }}
+                      >
+                        <Image
+                          src={
+                            "https://www.talentprotocol.com/images/talent-protocol-goal-card-left00001-p-500.jpg"
+                          }
+                          width={100}
+                          height={100}
+                          className="min-w-full w-52 inline-block"
+                          alt="profile"
+                        />
+                      </motion.div>
+                    ))}
+                  </div>
+                  <div className="absolute whitespace-no-wrap animate-marqueeright">
+                    {[...Array(100)].map((_, index) => (
+                      <motion.div
+                        key={index}
+                        className="transform w-52 transition-transform duration-200 border-[1.5px] border-[#dadde1] rounded-2xl shadow-md mb-4"
+                        // initial={{ translateY: 0 }}
+                        // animate={{ translateY: "-100%" }}
+                        // transition={{
+                        //   duration: 2,
+                        //   ease: "linear",
+                        //   repeat: Infinity,
+                        // }}
+                      >
+                        <Image
+                          src={
+                            "https://www.talentprotocol.com/images/talent-protocol-goal-card-left00001-p-500.jpg"
+                          }
+                          width={100}
+                          height={100}
+                          className="min-w-full w-52 inline-block"
+                          alt="profile"
+                        />
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+    </motion.div>
+  );
+};
+type AnimatedWordsProps = {
+  title: string;
+};
+
+const AnimatedWords: React.FC<AnimatedWordsProps> = ({ title }) => {
+  return (
+    <motion.span variants={staggerChildren}>
+      {title.split(" ").map((word, idx) => (
+        <div key={idx} className="inline-block h-auto overflow-hidden">
+          <motion.span
+            className="inline-block text-6xl inset-0 overflow-hidden"
+            variants={wordAnimation}
+          >
+            {word + "\u00A0"}
+          </motion.span>
+        </div>
+      ))}
+    </motion.span>
+  );
+};
+
+export default page;
+// i need to create  it seperate the appication for it 
