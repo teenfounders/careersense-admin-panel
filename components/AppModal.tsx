@@ -30,16 +30,18 @@ import Logo from "./AddLogo";
 import axios from "axios";
 import { Processor } from "postcss";
 import uploadFileToImageKit, { ImagekitResType } from "@/utils/imagekit";
+import { useCompany } from "@/context/CompanyId";
 // import { useOnboardingContext } from "@/context/OnboardingContext"; // Provide the correct path to your OnboardingProvider file
 
 type FormData = {
-  company: string;
-  oneliner: string;
-  careerURl: string;
+  company?: string;
+  oneliner?: string;
+  careerURl?: string;
   website: string;
-  atsurl: string;
+  atsurl?: string;
   linkdin: string;
-  companylogo: string;
+  companylogo?: string;
+  Logo?: string;
 };
 interface props {
   open: boolean;
@@ -54,16 +56,13 @@ const initialState = {
   atsurl: "",
   linkdin: "",
 };
-const publicKey = "public_JiAIs/vzR3BcOkQssCMuQjZ2r8w=";
-const urlEndpoint = "https://ik.imagekit.io/5npsdc2r7";
-const authenticationEndpoint = "http://localhost:3000/api/upload";
 
 const AppModal: React.FC<props> = ({ open, handleModalOpen }) => {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const {
     register,
     setValue,
-
+    reset,
     trigger,
     handleSubmit,
     formState: { errors, touchedFields },
@@ -89,7 +88,12 @@ const AppModal: React.FC<props> = ({ open, handleModalOpen }) => {
   const [error, setError] = useState(false);
 
   const [logoName, setLogoName] = useState<string[]>([]);
-
+  const {
+    selectedCompanyId,
+    setSelectedCompanyId,
+    fetchData,
+    companyNames,
+  } = useCompany();
   const [selectedLogo, setSelectedLogo] = useState<File | null>(null);
   const [uploadedImage, setUploadedImage] = useState<ImagekitResType | null>(
     null
@@ -140,27 +144,71 @@ const AppModal: React.FC<props> = ({ open, handleModalOpen }) => {
       console.error("Event target is undefined.");
     }
   };
+  const onSubmitLink = handleSubmit((data) => {
+    setLoading(true);
+    let url1 = data.website;
+    let url2 = data.linkdin;
+    console.log(url1, url2);
 
+    const fetchOgData = async () => {
+      try {
+        console.log("here in the link");
+        const response = await axios.post("/api/openGraph", { url1, url2 });
+
+        console.log("response form addmoda", response.data);
+        const { ogTitle, ogDescription } = response.data.data1.result;
+        const { ogImage, ogUrl: linkdin } = response.data.data2.result;
+        setName((prev) => ({
+          ...prev,
+          oneliner: ogDescription,
+          company: ogTitle,
+          website: data.website,
+          linkdin: linkdin,
+
+          companylogo: ogImage[0].url,
+        }));
+        onSubmit();
+      } catch (error) {
+        console.error("Error fetching data from the API", error);
+      }
+    };
+
+    fetchOgData();
+  });
   const onSubmit = handleSubmit((data) => {
     // Perform form submission logic here
-    setLoading(true);
 
     const additionalContent = {
-      Company_Name: data.company,
-      Careers_Page: data.careerURl,
-      Website: data.website,
-      Careers_Page_ATS: data.atsurl,
-      Tagline: data.oneliner,
-      Company_LinkedIn: data.linkdin,
-      Company_Logo: uploadedImage?.url,
+      Company_Name: name.company,
+      Careers_Page: name.careerURl,
+      Website: name.website,
+      Careers_Page_ATS: name.atsurl,
+      Tagline: name.oneliner,
+      Company_LinkedIn: name.linkdin,
+      Company_Logo: name.companylogo,
     };
+    console.log(additionalContent);
+    // const additionalContent = {
+    //   Company_Name: name.company,
+    //   Careers_Page: name.careerURl,
+    //   Website: name.website,
+    //   Careers_Page_ATS: name.atsurl,
+    //   Tagline: name.oneliner,
+    //   Company_LinkedIn: name.linkdin,
+    //   Company_Logo: uploadedImage?.url,
+    // };
     // Make a POST request to your API endpoint with the formData
     axios
       .post(`/api/companies`, additionalContent)
       .then((response) => {
         console.log("POST Response:", response);
-        onClose(); // Close the modal after successful submission
+        // Close the modal after successful submission
+        fetchData();
       })
+      .then(() => {
+        onClose();
+      })
+
       .catch((error) => {
         console.error("Error submitting form:", error);
         // Handle error state or display error message to the user
@@ -171,10 +219,6 @@ const AppModal: React.FC<props> = ({ open, handleModalOpen }) => {
     // Example: setExperiencTracker(response.data);
 
     // Close the modal after successful submission
-    setLoading(false);
-    if (loading == false) {
-      onClose();
-    }
   });
   const uploadAvatar = async (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -202,30 +246,19 @@ const AppModal: React.FC<props> = ({ open, handleModalOpen }) => {
   };
 
   const resetForm = () => {
-    setName({
-      company: "",
-      oneliner: "",
-      careerURl: "",
-      website: "",
-      atsurl: "",
-      linkdin: "",
-      companylogo: "",
-    });
     setError(false);
     // setLoader(false);
     // setUploadedImages('');
+
     setSelectedLogo(null);
   };
 
   React.useEffect(() => {
-    if (open) {
-      // Reset the form when the modal is opened
-      resetForm();
+    // Reset the form when the modal is opened or closed
+    if (open || !isOpen) {
+      reset(); // Call the reset function from react-hook-form
     }
-    if (!isOpen) {
-      resetForm();
-    }
-  }, [open, isOpen]);
+  }, [open, isOpen, reset]);
 
   // Call resetForm function when the modal is closed
 
@@ -242,7 +275,7 @@ const AppModal: React.FC<props> = ({ open, handleModalOpen }) => {
           placement="top-center"
         >
           <ModalContent>
-            {(onClose) => (
+            {() => (
               <>
                 <ModalHeader className="flex flex-col gap-1"></ModalHeader>
                 <ModalBody>
@@ -258,10 +291,10 @@ const AppModal: React.FC<props> = ({ open, handleModalOpen }) => {
                     // onChange={handleInputChange}
                     placeholder="Eg: Google"
                   /> */}
-                  <form onSubmit={onSubmit}>
+                  <form onSubmit={onSubmitLink}>
                     <div className="flex flex-col w-full ">
                       <div className="flex flex-col gap-3">
-                        <AppInput
+                        {/* <AppInput
                           type="text"
                           label="comapny"
                           id="company"
@@ -278,8 +311,8 @@ const AppModal: React.FC<props> = ({ open, handleModalOpen }) => {
                             required: "Company name is required",
                           })}
                           placeholder="Eg: Google"
-                        />
-                        <AppInput
+                        /> */}
+                        {/* <AppInput
                           type="text"
                           label=""
                           id="carrerUrl"
@@ -287,17 +320,18 @@ const AppModal: React.FC<props> = ({ open, handleModalOpen }) => {
                           classname="w-full text-sm  placeholder:text-sm h-[40px]"
                           errors={error}
                           placeholder="Career Site URL"
-                        />
+                        /> */}
                         <AppInput
                           type="text"
                           label=""
                           id="website"
+                          defaultValue={name.website}
                           {...register("website")}
                           classname="w-full text-sm  placeholder:text-sm h-[40px]"
                           errors={error}
                           placeholder="Website"
                         />
-                        <AppInput
+                        {/* <AppInput
                           type="text"
                           label=""
                           id="atsurl"
@@ -305,8 +339,8 @@ const AppModal: React.FC<props> = ({ open, handleModalOpen }) => {
                           classname="w-full py-1 text-sm placeholder:text-sm  h-[40px]"
                           errors={error}
                           placeholder="Ats URL"
-                        />
-                        <AppInput
+                        /> */}
+                        {/* <AppInput
                           type="text"
                           label=""
                           id="oneliner"
@@ -315,18 +349,28 @@ const AppModal: React.FC<props> = ({ open, handleModalOpen }) => {
                           errors={error}
                           onChange={handleInputChange}
                           placeholder="One Liner"
-                        />
+                        /> */}
 
                         <AppInput
                           type="text"
                           label=""
                           id="linkdin"
+                          defaultValue={name.linkdin}
                           {...register("linkdin")}
                           classname="w-full py-1 text-sm placeholder:text-sm  h-[40px]"
                           errors={error}
-                          onChange={handleInputChange}
                           placeholder="Linkdin"
                         />
+                        {/* <AppInput
+                          type="text"
+                          label=""
+                          id="Logo Url"
+                          {...register("Logo")}
+                          classname="w-full py-1 text-sm placeholder:text-sm  h-[40px]"
+                          errors={error}
+                          onChange={handleInputChange}
+                          placeholder="Logo Url"
+                        /> */}
 
                         {/* <div className="flex w-full items-center gap-10">
                           <label className="px-3 flex gap-1 py-2 text-[12.5px] text-[#666666] font-medium bg-transparent border-[1px] border-gray-300 rounded-md   cursor-pointer">
@@ -365,7 +409,7 @@ const AppModal: React.FC<props> = ({ open, handleModalOpen }) => {
                             )}
                           </div>
                         </div> */}
-                        <div className="flex w-full items-center gap-10">
+                        {/* <div className="flex w-full items-center gap-10">
                           <label className="px-3 flex gap-1 py-2 text-[12.5px] text-[#666666] font-medium bg-transparent border-[1px] border-gray-300 rounded-md cursor-pointer">
                             <span>Add</span>
                             <span>Logo</span>
@@ -380,7 +424,7 @@ const AppModal: React.FC<props> = ({ open, handleModalOpen }) => {
                           {uploadedImage && (
                             <div className="flex gap-3 justify-between w-full items-center">
                               <span className="text-[12.5px] w-full overflow-x-hidden">
-                                {/* {uploadedImage.url} */}
+                                 
                                 {uploadedImage.url &&
                                   (uploadedImage.url.length >= 0
                                     ? `${uploadedImage.url.slice(
@@ -403,10 +447,10 @@ const AppModal: React.FC<props> = ({ open, handleModalOpen }) => {
                               {errors.companylogo.message}
                             </span>
                           )}
-                        </div>
-                        <div className="w-full flex -mb-8 justify-end">
+                        </div> */}
+                        <div className="w-full flex  justify-end">
                           <APPButton
-                            classname="flex items-center w-20  justify-center capitalize rounded-xl bg-blue-600 text-white"
+                            classname="flex items-center w-20   justify-center capitalize rounded-xl bg-blue-600 text-white"
                             type="submit"
                             text={"Save"}
                             loading={loading}

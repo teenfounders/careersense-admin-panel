@@ -4,7 +4,8 @@ import AppSearchLeftInput from "@/components/AppSearchLeftInput";
 import { dummyItems } from "@/components/Sidebar";
 import { jobcardContent } from "@/utils/postdata";
 import Link from "next/link";
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useEffect, useRef, useState } from "react";
+import uploadFileToImageKit, { ImagekitResType } from "@/utils/imagekit";
 import {
   Modal,
   ModalContent,
@@ -22,6 +23,7 @@ import AppInput from "@/components/AppInput";
 import AppTextarea from "@/components/AppTextarea";
 import { register } from "module";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { IoConstructOutline } from "react-icons/io5";
 interface Comment {
   id: number;
   text: string;
@@ -36,11 +38,20 @@ type FormData = {
   postlink: string;
   reality: string;
   editor1Content: string;
+  images?: string[] | null;
   editor2Content: string;
 };
 
 const SocialProofs = (props: Props) => {
-  const [uploadedImages, setUploadedImages] = useState<Array<File>>([]);
+  const firstInputRef = useRef<HTMLInputElement>(null);
+  const [uploadedImages, setUploadedImages] = useState<
+    (string | ImagekitResType)[]
+  >([]);
+
+  // const [uploadedImages, setUploadedImages] = useState<Array<File>| string>([]);
+  const [uploadedImage, setUploadedImage] = useState<ImagekitResType | null>(
+    null
+  );
   const [selectedItem, setSelectedItem] = useState<string>(""); // State to manage selected item in sidebar
 
   const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
@@ -65,7 +76,6 @@ const SocialProofs = (props: Props) => {
 
   const [mainComment, setMainComment] = useState<string>("");
   const [comments, setComments] = useState<Comment[]>([]);
-
   const handleComment = () => {
     const newComment: Comment = {
       id: comments.length + 1,
@@ -104,7 +114,8 @@ const SocialProofs = (props: Props) => {
 
     // Combine the main comment and additional comments into a single array
     const allComments = [mainComment, ...additionalComments]; // Filter out undefined or falsy values
-
+    let imagess: string[] = uploadedImages.map((img: any) => img?.url);
+    console.log(imagess);
     const formData = {
       prooftitle: data.prooftitle,
       createpost: data.createpost,
@@ -113,21 +124,11 @@ const SocialProofs = (props: Props) => {
       platform: data.platform,
       postlink: data.platform,
       reality: data.reality,
-
+      images: imagess,
       editor1Content: editor1Content,
       editor2Content: editor2Content,
     };
     console.log(formData);
-
-    onClose();
-  };
-
-  const uploadAvatar = (event: ChangeEvent<HTMLInputElement>): void => {
-    const files = event.target.files;
-    if (files) {
-      const newImages: File[] = Array.from(files);
-      setUploadedImages([...uploadedImages, ...newImages]);
-    }
   };
 
   const deleteImage = (index: number): void => {
@@ -135,7 +136,64 @@ const SocialProofs = (props: Props) => {
     updatedImages.splice(index, 1);
     setUploadedImages(updatedImages);
   };
+  const uploadAvatar = async (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      const file = event.target.files[0];
+      try {
+        // Assume uploadedImage contains the API response
+        const uploadedImage = await uploadFileToImageKit({
+          file,
+          folder: "Company_Logo",
+          uploadUrl: process.env.IMAGEKIT_API_UPLOAD_URL!, // Pass the ImageKit upload URL here
+        });
 
+        // Construct the full image URL
+        // const imageUrl = `${uploadedImage.urlEndpoint}/${uploadedImage.folder}/${file.name}`;
+
+        // console.log("Image uploaded successfully. Image URL:", imageUrl);
+
+        setUploadedImages((prevImages) => [...prevImages, uploadedImage]);
+        console.log("this is actual url", uploadedImage);
+        setUploadedImage(uploadedImage);
+        // Handle the imageUrl as needed in your application
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        // Handle the error, show a message to the user, etc.
+      }
+    }
+  };
+  // const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+
+  //   if (file) {
+  //     const formData = new FormData();
+  //     formData.append("file", file);
+
+  //     try {
+  //       const response = await axios.post<{ imageUrl: string }>(
+  //         "/api/auth",
+  //         formData,
+  //         {
+  //           headers: {
+  //             "Content-Type": "multipart/form-data",
+  //           },
+  //         }
+  //       );
+
+  //       const imageUrl = response.data.imageUrl;
+  //       console.log("Image uploaded successfully:", imageUrl);
+  //       // Use the imageUrl as needed in your application
+  //     } catch (error) {
+  //       console.error("Error uploading image:", error);
+  //       // Handle the error, show a message to the user, etc.
+  //     }
+  //   }
+  // };
+  useEffect(() => {
+    if (firstInputRef.current) {
+      firstInputRef.current.focus();
+    }
+  }, [isOpen]);
   return (
     <main className="bg-[#fafafa] flex flex-col grow relative w-full  h-screen overflow-y-auto">
       {/* <header className="sticky z-20 top-0 shadow-md min-w-full bg-white border-b-[1px] border-[#dadada] min-h-[86px]  mb-0"> */}
@@ -153,10 +211,9 @@ const SocialProofs = (props: Props) => {
 
           <Modal
             isOpen={isOpen}
-            size={"2xl"}
+            size={"3xl"}
             onOpenChange={onOpenChange}
             scrollBehavior={scrollBehavior}
-            className="w-[600px]"
           >
             <ModalContent>
               {(onClose) => (
@@ -165,8 +222,11 @@ const SocialProofs = (props: Props) => {
                     Social Proof
                   </ModalHeader>
                   <ModalBody>
-                    <form onSubmit={handleSubmit(onSubmit)}>
-                      <div className="flex flex-col gap-[30px]  ">
+                    <form
+                      onSubmit={handleSubmit(onSubmit)}
+                      className="relative  "
+                    >
+                      <div className="flex flex-col gap-[10px]  ">
                         {" "}
                         <div>
                           <AppInput
@@ -174,7 +234,7 @@ const SocialProofs = (props: Props) => {
                             label={""}
                             placeholder="Proof Title"
                             {...register("prooftitle")}
-                            classname="w-full"
+                            classname="w-full text-sm placeholder:text-sm h-[40px] tracking-[-0.015em]"
                           />
                         </div>
                         <div className="w-full ">
@@ -188,8 +248,9 @@ const SocialProofs = (props: Props) => {
                             type={"text"}
                             label={""}
                             {...register("addtag")}
-                            classname="w-full"
+                            classname="w-full text-sm placeholder:text-sm h-[40px] "
                             placeholder="Add tags"
+                            ref={firstInputRef}
                           />
                         </div>
                         <div className="flex min-will gap-2 mb-1  ">
@@ -198,7 +259,7 @@ const SocialProofs = (props: Props) => {
                               type={"text"}
                               label={""}
                               {...register("platform")}
-                              classname=" w-full"
+                              classname=" w-full text-sm placeholder:text-sm h-[40px] "
                               placeholder="Platform"
                             />
                           </div>
@@ -207,7 +268,7 @@ const SocialProofs = (props: Props) => {
                               type={"text"}
                               label={""}
                               {...register("postlink")}
-                              classname="w-full"
+                              classname="w-full text-sm placeholder:text-sm h-[40px] "
                               placeholder="Post Link"
                             />
                           </div>
@@ -310,21 +371,22 @@ const SocialProofs = (props: Props) => {
                             onEditorContentChange={onEditorChange2}
                           />
                         </div>
-                        <div className="flex w-full items-start gap-10">
+                      </div>
+                      <div className="w-full pb-2  sticky -bottom-2 h-fit min-w-full  bg-white  z-50 flex flex-col justify-end">
+                        <div className="flex w-full py-5 items-end justify-end   gap-10">
                           <label className="px-3 flex gap-1 py-2 text-[12.5px] text-[#666666] font-medium bg-transparent border-[1px] border-gray-300 rounded-md cursor-pointer">
                             <span>Add</span>
                             <span>Logo</span>
                             <input
                               type="file"
-                              name="avatar" // Provide a valid name attribute
                               onChange={uploadAvatar}
                               className="hidden"
+                              required
                               accept=".jpg, .jpeg, .png"
-                              multiple
                             />
                           </label>
                           <div className="flex flex-col gap-3 w-full">
-                            {uploadedImages.map((image, index) => (
+                            {uploadedImages.map((image: any, index) => (
                               <div
                                 key={index}
                                 className="flex gap-3 items-center"
@@ -340,17 +402,22 @@ const SocialProofs = (props: Props) => {
                                 </button>
                               </div>
                             ))}
+                            {errors.images && (
+                              <span className="text-red-500">
+                                {errors.images.message}
+                              </span>
+                            )}
                           </div>
                         </div>
-                      </div>
-                      <div className="w-full m-3 flex justify-end">
-                        <APPButton
-                          classname="flex items-center w-20  justify-center capitalize rounded-xl bg-blue-600 text-white"
-                          type="submit"
-                          text={"Save"}
-                          loading={loading}
-                          forwardimage
-                        />
+                        <div className=" flex w-full justify-end items-end">
+                          <APPButton
+                            classname="flex items-center w-20  justify-center capitalize rounded-xl bg-blue-600 text-white"
+                            type="submit"
+                            text={"Save"}
+                            loading={loading}
+                            forwardimage
+                          />
+                        </div>
                       </div>
                     </form>
                   </ModalBody>

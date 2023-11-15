@@ -2,6 +2,8 @@
 // import axios from 'axios';
 // import cheerio from 'cheerio-without-node-native'; // Import cheerio from the alternative library
 
+import axios from "axios";
+
 // export const useCompanyData = (selectedCompanyId: string) => {
 //   return useQuery(['companyData', selectedCompanyId], async () => {
 //     const response = await axios(`/api/companies/${selectedCompanyId}/experience-tracker`);
@@ -37,3 +39,14 @@
 // };
 
 // export default getOpenGraphData;
+
+
+ export const fetchCompanyNames = async () => {
+    const response = await axios.get(`/api/companies`);
+    return response.data;
+ };
+  
+export const fetchCompanyOpenGraph = async (url1:string, url2:string) => {
+    const response = await axios.post("/api/openGraph", { url1, url2 });
+    return response;
+ }

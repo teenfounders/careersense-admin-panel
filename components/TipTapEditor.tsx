@@ -130,7 +130,7 @@ const TipTapEditor = ({ onEditorContentChange, editorcontent }: Props) => {
 
   return (
     <div
-      className={`max-w-screen-2xl h-[150px] rounded-l-xl overflow-hidden overflow-y-auto overflow-x-hidden border-2 outline-none focus:border-blue-500 transition duration-300 ${
+      className={`max-w-screen-2xl h-[270px] rounded-l-xl overflow-hidden overflow-y-auto overflow-x-hidden border-2 outline-none focus:border-blue-500 transition duration-300 ${
         isFocused ? "border-black rounded-xl" : "border-gray-300"
       }`}
       onBlur={() => setIsFocused((prev) => !prev)}
@@ -142,7 +142,7 @@ const TipTapEditor = ({ onEditorContentChange, editorcontent }: Props) => {
       <div className="prose px-3">
         <EditorContent
           editor={editor}
-          className="prose-h-2xl min-h-10 prose-xs leading-5"
+          className="prose-h-2xl min-h-15 prose-xs leading-5"
         />
       </div>
     </div>

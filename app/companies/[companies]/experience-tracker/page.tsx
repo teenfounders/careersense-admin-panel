@@ -95,7 +95,7 @@ const ExperienceTracker = (props: Props) => {
       };
 
       setLoading(true);
-
+      console.log(selectedCompanyId);
       // Make a PATCH request to update the existing experience
       axios
         .patch(
@@ -119,11 +119,12 @@ const ExperienceTracker = (props: Props) => {
       // Handle error state or display error message to the user
     }
   };
+  console.log(selectedCompanyId);
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     try {
       const formData = {
-        companyId: id, // Replace this with the actual companyId value
+        companyId: selectedCompanyId,
         role: data.role,
         experience: data.experience, // Assuming campusPartner corresponds to experience
         url: "https://www.google.com/", // Replace this with the actual URL value

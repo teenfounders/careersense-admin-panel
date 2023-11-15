@@ -1,9 +1,23 @@
 "use client";
-import React, { createContext, useContext, ReactNode, useState } from "react";
+import { fetchCompanyNames } from "@/lib/action";
+import { ICompany } from "@/utils/types";
+import { useDisclosure } from "@nextui-org/react";
+import { useQuery } from "@tanstack/react-query";
+import { ObjectId } from "mongoose";
+import React, {
+  createContext,
+  useContext,
+  ReactNode,
+  useState,
+  useEffect,
+} from "react";
 
 interface CompanyContextProps {
   selectedCompanyId: string | null;
   setSelectedCompanyId: React.Dispatch<React.SetStateAction<string | null>>;
+  companyNames: ICompany[];
+  fetchData: () => void;
+  onClose: () => void;
 }
 
 const CompanyContext = createContext<CompanyContextProps | undefined>(
@@ -16,10 +30,40 @@ export const CompanyProvider: React.FC<{ children: ReactNode }> = ({
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(
     null
   );
+  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+  const [companyNames, setCompanyNames] = useState<ICompany[]>([]);
+
+  const { data: companyNamess, isLoading, isError } = useQuery({
+    queryKey: ["companynames"],
+    queryFn: fetchCompanyNames,
+  });
+  const fetchData = async () => {
+    try {
+      console.log("first requred");
+      const data = await fetchCompanyNames();
+      console.log(data.companies); // Call your data fetching function
+      setCompanyNames(data.companies);
+      onClose(); // Update the state with fetched companies
+    } catch (error) {
+      console.error("Error fetching companies:", error);
+    }
+  };
+
+  // Fetch companies when the component mounts
+  useEffect(() => {
+    fetchData(); // Call the fetchData function when the component mounts
+  }, []);
 
   return (
     <CompanyContext.Provider
-      value={{ selectedCompanyId, setSelectedCompanyId }}
+      value={{
+        selectedCompanyId,
+        setSelectedCompanyId,
+        companyNames,
+        fetchData,
+
+        onClose,
+      }}
     >
       {children}
     </CompanyContext.Provider>

@@ -42,9 +42,7 @@ const APPButton = ({
         classname
       )}
     >
-      {loading && (
-        <Image src={loader} alt="loader" className="animate-spin invert" />
-      )}
+      {loading && <Image src={loader} alt="loader" className="animate-spin " />}
       {text}
       {!disabled && !forwardimage && (
         <span

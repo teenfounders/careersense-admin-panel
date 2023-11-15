@@ -14,39 +14,53 @@ import { ICompany } from "@/utils/types";
 
 import { useRouter } from "next/navigation";
 import { useCompany } from "@/context/CompanyId";
+import { useQuery } from "@tanstack/react-query";
+import { fetchCompanyNames } from "@/lib/action";
 
-type Props = {};
-
-const Companies = (props: Props) => {
+const Companies = () => {
   const router = useRouter();
-  const { selectedCompanyId, setSelectedCompanyId } = useCompany();
+  const {
+    selectedCompanyId,
+    setSelectedCompanyId,
+    fetchData,
+    companyNames,
+  } = useCompany();
+  console.log(companyNames);
   const [open, setOpen] = useState(false);
-  const [companyNames, setCompanyNames] = useState<ICompany[]>([]);
+  const [companyName, setCompanyNames] = useState<ICompany[]>([]);
 
   const handleModalOpen = () => {
     setOpen((prev) => !prev);
   };
   const handleCompanyClick = (companyId: string, companyNamess: string) => {
     // Set the selected company ID in the context
-    console.log(companyId);
-    console.log(companyNamess);
+
     setSelectedCompanyId(companyId);
 
     // Navigate to the company page without exposing the company ID in the URL
     router.push(`/companies/${companyNamess}`);
   };
-  useEffect(() => {
-    const fetchCompanyNames = async () => {
-      try {
-        const response = await axios.get(`/api/companies`);
-        const data = response.data; // Assuming `data.companies` contains the array of companies
-        setCompanyNames(data.companies);
-      } catch (error) {
-        console.error("Error fetching company names:", error);
-      }
-    };
+  // const fetchCompanyNames = async () => {
+  //   const response = await axios.get(`/api/companies`);
+  //   return response.data;
+  // };
+  // const { data: companyNames, isLoading, isError } = useQuery({
+  //   queryKey: ["companynames"],
+  //   queryFn: fetchCompanyNames,
+  // });
 
-    fetchCompanyNames();
+  useEffect(() => {
+    fetchData();
+    // const fetchCompanyNames = async () => {
+    //   try {
+    //     const response = await axios.get(`/api/companies`);
+    //     const data = response.data; // Assuming `data.companies` contains the array of companies
+    //     setCompanyNames(data.companies);
+    //   } catch (error) {
+    //     console.error("Error fetching company names:", error);
+    //   }
+    // };
+    // fetchCompanyNames();
   }, []);
   return (
     <main className="bg-[#fafafa] flex flex-col grow relative w-full  h-screen overflow-y-auto">
@@ -72,9 +86,10 @@ const Companies = (props: Props) => {
             </div>
 
             <div className="grid grid-cols-3 gap-4 relative">
-              {companyNames.length > 0 ? (
+              {companyNames &&
+                companyNames.length > 0 &&
                 companyNames
-                  .map((company, idx) => (
+                  .map((company: any, idx: any) => (
                     <div key={idx} className="text-[#4766cc]">
                       <Link
                         href={{
@@ -86,7 +101,7 @@ const Companies = (props: Props) => {
                         onClick={() =>
                           handleCompanyClick(
                             company._id || "",
-                            company.Company_Name
+                            company.Company_Name.split(/[ -]/)[0]
                           )
                         }
                         // as={`/companies/${company.Company_Name.toLowerCase()}`}
@@ -97,8 +112,9 @@ const Companies = (props: Props) => {
                       </Link>
                     </div>
                   ))
-                  .reverse()
-              ) : (
+                  .reverse()}
+
+              {/* {isLoading && (
                 <div className="w-full mx-auto col-span-3  flex gap-3 justify-center  my-10 ">
                   <Image
                     src={loader}
@@ -108,6 +124,16 @@ const Companies = (props: Props) => {
                   loading...
                 </div>
               )}
+              {isError && (
+                <div className="w-full mx-auto col-span-3  flex gap-3 justify-center  my-10 ">
+                  <Image
+                    src={loader}
+                    alt="loader"
+                    className="animate-spin invert"
+                  />
+                  Something
+                </div>
+              )} */}
             </div>
             {/* </div> */}
             {/* </div> */}
