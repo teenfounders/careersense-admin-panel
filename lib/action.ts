@@ -50,3 +50,14 @@ export const fetchCompanyOpenGraph = async (url1:string, url2:string) => {
     const response = await axios.post("/api/openGraph", { url1, url2 });
     return response;
  }
+export const fetchSocialProof = async () => {
+    const response = await axios.get(`/api/social-proof`);
+    return response;
+}
+export const fetchSocialProofById = async (selectedSocialProofId:any) => {
+    const response = await axios
+        
+        .get(`/api/social-proof/${selectedSocialProofId}`)
+         return response
+         
+ }

@@ -25,7 +25,7 @@ const Companies = () => {
     fetchData,
     companyNames,
   } = useCompany();
-  console.log(companyNames);
+
   const [open, setOpen] = useState(false);
   const [companyName, setCompanyNames] = useState<ICompany[]>([]);
 

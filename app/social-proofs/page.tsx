@@ -1,9 +1,6 @@
 "use client";
 import APPButton from "@/components/AppButton";
-import AppSearchLeftInput from "@/components/AppSearchLeftInput";
-import { dummyItems } from "@/components/Sidebar";
-import { jobcardContent } from "@/utils/postdata";
-import Link from "next/link";
+
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import uploadFileToImageKit, { ImagekitResType } from "@/utils/imagekit";
 import {
@@ -21,17 +18,31 @@ import {
 import TipTapEditor from "@/components/TipTapEditor";
 import AppInput from "@/components/AppInput";
 import AppTextarea from "@/components/AppTextarea";
-import { register } from "module";
+
 import { SubmitHandler, useForm } from "react-hook-form";
-import { IoConstructOutline } from "react-icons/io5";
+import axios from "axios";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSocialProof } from "@/context/SocialProof";
+import router from "next/router";
+import AppSocialProofModal from "@/components/AppSocialProofModal";
+
 interface Comment {
   id: number;
   text: string;
 }
-type Props = {};
+interface createSocialProof {
+  ProofTitle: string;
+  AddTags: string;
+  Post: string;
+  Platform: string;
+  PostLink: string;
+  Comment: string[] | string;
+  Reality: string;
+  Images: string[] | null;
+}
 type FormData = {
   prooftitle: string;
-  createpost: string;
+
   addtag: string;
   comment: string[] | string;
   platform: string;
@@ -42,18 +53,37 @@ type FormData = {
   editor2Content: string;
 };
 
-const SocialProofs = (props: Props) => {
+const SocialProofs = () => {
   const firstInputRef = useRef<HTMLInputElement>(null);
   const [uploadedImages, setUploadedImages] = useState<
     (string | ImagekitResType)[]
   >([]);
 
   // const [uploadedImages, setUploadedImages] = useState<Array<File>| string>([]);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm<FormData>();
+
   const [uploadedImage, setUploadedImage] = useState<ImagekitResType | null>(
     null
   );
-  const [selectedItem, setSelectedItem] = useState<string>(""); // State to manage selected item in sidebar
+  const queryClient = useQueryClient();
 
+  const [selectedItem, setSelectedItem] = useState<string>(""); // State to manage selected item in sidebar
+  const {
+    SocialProofNames,
+    openEditModal,
+    setOpenEditModal,
+    selectedSocialProofId,
+    setSelectedSocialProofId,
+    fetchSocialProofById,
+    SocialProofId,
+    fetchSocialProofData,
+  } = useSocialProof();
   const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
   const [loading, setLoading] = useState(false);
   const [value, setValue] = useState<string>("");
@@ -67,9 +97,13 @@ const SocialProofs = (props: Props) => {
     console.log("editor1 ", content);
     setEditor1Content(content);
   };
+
   const onEditorChange2 = (content: string) => {
+    console.log("editor2 ", content);
     setEditor2Content(content);
   };
+  // const [openEditModal, setOpenEditModal] = useState(false);
+
   const [scrollBehavior, setScrollBehavior] = React.useState<
     ModalProps["scrollBehavior"]
   >("inside");
@@ -94,17 +128,47 @@ const SocialProofs = (props: Props) => {
       setComments(updatedComments);
     }
   };
+  const fetchSocialProof = async () => {
+    const response = await axios.get(`/api/social-proof`);
+    return response.data; // Return the data property
+  };
   const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<FormData>();
+    data: socialProofs,
+    refetch: refetchSocialProofs,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["socialProof"],
+    queryFn: fetchSocialProof,
+  });
 
-  const onSubmit: SubmitHandler<FormData> = (data, events) => {
+  if (isError) {
+    return <div>Error fetching social proofs</div>;
+  }
+
+  const CreateSocialProof = useMutation({
+    mutationFn: (FormData: createSocialProof) =>
+      axios.post("/api/social-proof", FormData),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ["socialProof"] }),
+  });
+
+  const onSubmit: SubmitHandler<FormData> = async (data, events) => {
     events?.preventDefault();
-    // const mainComment = data.comment;
-    // Use the correct state variable holding the main comment textarea value
+    setLoading(true);
+    // Access form data using the correct property names
+    console.table(data);
+    const {
+      prooftitle,
+
+      addtag,
+
+      platform,
+      postlink,
+
+      // editor1Content,
+      // editor2Content,
+    } = data;
 
     let additionalComments: string[] = [];
     if (comments && comments.length > 0) {
@@ -113,23 +177,62 @@ const SocialProofs = (props: Props) => {
     }
 
     // Combine the main comment and additional comments into a single array
-    const allComments = [mainComment, ...additionalComments]; // Filter out undefined or falsy values
+    const allComments = [mainComment, ...additionalComments];
+
     let imagess: string[] = uploadedImages.map((img: any) => img?.url);
     console.log(imagess);
+    console.log(editor1Content, "this is e", editor2Content);
     const formData = {
-      prooftitle: data.prooftitle,
-      createpost: data.createpost,
-      addtag: data.addtag,
-      comment: allComments,
-      platform: data.platform,
-      postlink: data.platform,
-      reality: data.reality,
-      images: imagess,
-      editor1Content: editor1Content,
-      editor2Content: editor2Content,
+      ProofTitle: prooftitle,
+      AddTags: addtag,
+      Post: editor1Content,
+      Platform: platform,
+      PostLink: postlink,
+      Comment: allComments,
+      Reality: editor2Content,
+      Images: imagess,
     };
-    console.log(formData);
+    try {
+      CreateSocialProof.mutate(formData);
+      // If the mutation is successful, you can refetch the data
+      // await refetchSocialProofs();
+
+      setLoading(false);
+      onClose();
+      reset();
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    } finally {
+      setLoading(false);
+    }
+    // axios
+    //   .post(`/api/social-proof`, formData)
+    //   .then((response) => {
+    //     console.log("POST Response:", response);
+    //     // Close the modal after successful submission
+    //   })
+
+    //   .catch((error) => {
+    //     console.error("Error submitting form:", error);
+    //     // Handle error state or display error message to the user
+    //   });
+
+    // Assuming you have a `reset` function from the `useForm` hook
   };
+  // const getSocialProofbyId = async () => {
+  //   const response = await axios.get(`/api/social-proof/${getSocialProofbyId}`);
+  //   return response.data; // Return the data property
+  // };
+  // const {
+  //   data: socialProofsbyid,
+  //   refetch: refetchSocialProofsbyid,
+  //   isLoading: socilaproofsbyidloading,
+  //   isError: socialproofserror,
+  // } = useQuery({
+  //   queryKey: ["getsocialproof"],
+  //   queryFn: getSocialProofbyId,
+  //   enabled: false,
+  // });
 
   const deleteImage = (index: number): void => {
     const updatedImages = [...uploadedImages];
@@ -143,7 +246,7 @@ const SocialProofs = (props: Props) => {
         // Assume uploadedImage contains the API response
         const uploadedImage = await uploadFileToImageKit({
           file,
-          folder: "Company_Logo",
+          folder: "socialproof_Logo",
           uploadUrl: process.env.IMAGEKIT_API_UPLOAD_URL!, // Pass the ImageKit upload URL here
         });
 
@@ -162,38 +265,61 @@ const SocialProofs = (props: Props) => {
       }
     }
   };
-  // const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.target.files?.[0];
 
-  //   if (file) {
-  //     const formData = new FormData();
-  //     formData.append("file", file);
+  // ... (existing code)
+  const {
+    data: socialProofsofId,
+    refetch: refetchSocialProofsbyid,
+    isLoading: socialproofmodalloading,
+    isError: socialproofmodalerror,
+  } = useQuery({
+    queryKey: ["socialProofbyId"],
+    queryFn: fetchSocialProofById,
+    enabled: false,
+  });
 
-  //     try {
-  //       const response = await axios.post<{ imageUrl: string }>(
-  //         "/api/auth",
-  //         formData,
-  //         {
-  //           headers: {
-  //             "Content-Type": "multipart/form-data",
-  //           },
-  //         }
-  //       );
+  const handleSocialProofClick = async (socialproofId: string) => {
+    try {
+      // Set the selected social proof ID
+      setSelectedSocialProofId(socialproofId);
 
-  //       const imageUrl = response.data.imageUrl;
-  //       console.log("Image uploaded successfully:", imageUrl);
-  //       // Use the imageUrl as needed in your application
-  //     } catch (error) {
-  //       console.error("Error uploading image:", error);
-  //       // Handle the error, show a message to the user, etc.
-  //     }
-  //   }
-  // };
-  useEffect(() => {
-    if (firstInputRef.current) {
-      firstInputRef.current.focus();
+      // Check if the modal is open and the selected social proof ID is set
+      // if (socialproofId) {
+      //   // If not already open, fetch the data
+      //   refetchSocialProofsbyid();
+      //   // Toggle the modal state
+      // } else {
+      //   // If already open, close the modal
+      setOpenEditModal((prev) => !prev);
+      // }
+    } catch (error) {
+      console.error("Error fetching social proof by ID:", error);
     }
-  }, [isOpen]);
+  };
+  // useEffect(() => {
+  //   const fetchSocialProofById = async () => {
+  //     try {
+  //       setLoading(true);
+  //       if (selectedSocialProofId) {
+  //         const response = await axios.get(
+  //           `/api/social-proof/${selectedSocialProofId}`
+  //         );
+  //         setSocialProofData(response.data);
+  //         console.log(response.data);
+  //       }
+  //     } catch (error) {
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchSocialProofById();
+  // }, [selectedSocialProofId]);
+  useEffect(() => {
+    console.log("Updated editor2 content: ", editor2Content);
+    console.log("Updated editor2 content: ", editor1Content);
+  }, [editor2Content, editor1Content]);
+
   return (
     <main className="bg-[#fafafa] flex flex-col grow relative w-full  h-screen overflow-y-auto">
       {/* <header className="sticky z-20 top-0 shadow-md min-w-full bg-white border-b-[1px] border-[#dadada] min-h-[86px]  mb-0"> */}
@@ -222,18 +348,15 @@ const SocialProofs = (props: Props) => {
                     Social Proof
                   </ModalHeader>
                   <ModalBody>
-                    <form
-                      onSubmit={handleSubmit(onSubmit)}
-                      className="relative  "
-                    >
+                    <form onSubmit={handleSubmit(onSubmit)}>
                       <div className="flex flex-col gap-[10px]  ">
                         {" "}
                         <div>
                           <AppInput
-                            type={"text"}
-                            label={""}
+                            type="text"
+                            label=""
                             placeholder="Proof Title"
-                            {...register("prooftitle")}
+                            {...register("prooftitle")} // Make sure to include this line
                             classname="w-full text-sm placeholder:text-sm h-[40px] tracking-[-0.015em]"
                           />
                         </div>
@@ -250,7 +373,6 @@ const SocialProofs = (props: Props) => {
                             {...register("addtag")}
                             classname="w-full text-sm placeholder:text-sm h-[40px] "
                             placeholder="Add tags"
-                            ref={firstInputRef}
                           />
                         </div>
                         <div className="flex min-will gap-2 mb-1  ">
@@ -372,43 +494,42 @@ const SocialProofs = (props: Props) => {
                           />
                         </div>
                       </div>
-                      <div className="w-full pb-2  sticky -bottom-2 h-fit min-w-full  bg-white  z-50 flex flex-col justify-end">
-                        <div className="flex w-full py-5 items-end justify-end   gap-10">
-                          <label className="px-3 flex gap-1 py-2 text-[12.5px] text-[#666666] font-medium bg-transparent border-[1px] border-gray-300 rounded-md cursor-pointer">
-                            <span>Add</span>
-                            <span>Logo</span>
-                            <input
-                              type="file"
-                              onChange={uploadAvatar}
-                              className="hidden"
-                              required
-                              accept=".jpg, .jpeg, .png"
-                            />
-                          </label>
-                          <div className="flex flex-col gap-3 w-full">
-                            {uploadedImages.map((image: any, index) => (
-                              <div
-                                key={index}
-                                className="flex gap-3 items-center"
-                              >
-                                <span className="text-[12.5px] w-full overflow-x-hidden">
-                                  {image.name}
-                                </span>
-                                <button
-                                  className="text-red-500 text-[12.5px]"
-                                  onClick={() => deleteImage(index)}
-                                >
-                                  Delete
-                                </button>
-                              </div>
-                            ))}
-                            {errors.images && (
-                              <span className="text-red-500">
-                                {errors.images.message}
+                      <div className="flex w-full py-5 items-end justify-end   gap-10">
+                        <label className="px-3 flex gap-1 py-2 text-[12.5px] text-[#666666] font-medium bg-transparent border-[1px] border-gray-300 rounded-md cursor-pointer">
+                          <span>Add</span>
+                          <span>Image</span>
+                          <input
+                            type="file"
+                            onChange={uploadAvatar}
+                            className="hidden"
+                            accept=".jpg, .jpeg, .png"
+                          />
+                        </label>
+                        <div className="flex flex-col gap-3 w-full">
+                          {uploadedImages.map((image: any, index) => (
+                            <div
+                              key={index}
+                              className="flex gap-3 items-center"
+                            >
+                              <span className="text-[12.5px] w-full overflow-x-hidden">
+                                {image.name}
                               </span>
-                            )}
-                          </div>
+                              <button
+                                className="text-red-500 text-[12.5px]"
+                                onClick={() => deleteImage(index)}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          ))}
+                          {errors.images && (
+                            <span className="text-red-500">
+                              {errors.images.message}
+                            </span>
+                          )}
                         </div>
+                      </div>
+                      <div className="w-full  sticky -bottom-2 h-full min-w-full bg-white pt-5 py-2 z-50 flex flex-col justify-end">
                         <div className=" flex w-full justify-end items-end">
                           <APPButton
                             classname="flex items-center w-20  justify-center capitalize rounded-xl bg-blue-600 text-white"
@@ -433,11 +554,41 @@ const SocialProofs = (props: Props) => {
           <div className="p-4 mb-4 bg-white shadow-md border-[1px] border-[#dadada]  rounded-md overflow-hidden">
             <div className="w-full flex  justify-between mb-4">
               <span className="overflow-hidden text-sm text-[#666] font-medium">
-                YOUR TOP JOB MATCHES ON UNTAPPED
+                Social Proof
               </span>
             </div>
-            <div className="grid h-screen grid-cols-1 sm:grid-cols-2 md:grid-cols-3 grid-rows-auto gap-4 justify-stretch items-stretch"></div>
+            <div className="  min-h-[80vh]  flex flex-col w-full gap-4 justify-stretch items-stretch">
+              {socialProofs && (
+                <>
+                  {socialProofs.socialproofs
+                    .map((socialproof: any, idx: any) => (
+                      <div key={idx} className="text-[#4766cc]">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleSocialProofClick(socialproof._id || "")
+                          }
+                        >
+                          <span className="font-medium font-sans hover:text- text-md text-blue-500">
+                            {/* <span className="font-medium hover:text- text-md text-[#4E71DA]"> */}
+                            {socialproof.ProofTitle}
+                          </span>
+                        </button>
+                      </div>
+                    ))
+                    .reverse()}
+                  {socialProofs.isFetching && (
+                    <div>Updating in the background...</div>
+                  )}
+                </>
+              )}
+            </div>
           </div>
+        </div>
+        <div className="">
+          {/* {SocialProofId && ( */}
+          <AppSocialProofModal Open={openEditModal} Images={[]} />
+          {/* )} */}
         </div>
       </main>
     </main>

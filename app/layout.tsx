@@ -18,6 +18,7 @@ import MenuContextProvider from "@/context/MenuContext";
 import Sidebar from "@/components/Sidebar";
 import MainHeader from "@/components/MainHeader";
 import { CompanyProvider } from "@/context/CompanyId";
+import { SocialProofProvider } from "@/context/SocialProof";
 
 export default function RootLayout({
   children,
@@ -31,18 +32,20 @@ export default function RootLayout({
         <QueryClientProvider client={queryClient}>
           <Providers>
             <CompanyProvider>
-              <MenuContextProvider>
-                <div className="flex  relative overflow-hidden ">
-                  <Sidebar />
+              <SocialProofProvider>
+                <MenuContextProvider>
+                  <div className="flex  relative overflow-hidden ">
+                    <Sidebar />
 
-                  <div className=" relative flex-col lg:ml-[280px] flex flex-1 w-full xl:ml-18  ">
-                    {/* <div className="lg:hidden">
+                    <div className=" relative flex-col lg:ml-[280px] flex flex-1 w-full xl:ml-18  ">
+                      {/* <div className="lg:hidden">
                   <MainHeader />
                 </div> */}
-                    <div className="relative">{children}</div>
+                      <div className="relative">{children}</div>
+                    </div>
                   </div>
-                </div>
-              </MenuContextProvider>
+                </MenuContextProvider>
+              </SocialProofProvider>
             </CompanyProvider>
           </Providers>
           {/* </QueryClientProvider> */}
