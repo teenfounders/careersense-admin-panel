@@ -48,6 +48,7 @@
 // };
 
 // export default Textarea;
+"use client";
 import React, {
   ChangeEvent,
   TextareaHTMLAttributes,

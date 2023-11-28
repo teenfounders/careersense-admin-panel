@@ -3,6 +3,7 @@ import { ISocialProof } from '@/utils/types';
 import { connect } from '@/dbConfig/dbConfig';
 import { NextRequest, NextResponse } from 'next/server';
 import { socialproof } from '@/models/social-proof';
+import mongoose from 'mongoose';
 
 interface Params {
   id: string;  
@@ -13,11 +14,14 @@ export const GET = async (request: NextRequest, { params }: { params: Params }) 
   const { id } = params;
   try {
     await connect();
-      
-       if (!params.id) {
+    console.log(id)
+    
+    if (!params.id) {
       return new NextResponse("Invalid Company ID", { status: 400 });
     }
-    const getsocialproof = await socialproof.findById(id);
+    let ids =  new mongoose.Types.ObjectId(id)
+    console.log(ids)
+    const getsocialproof = await socialproof.findById(ids);
  
     if (getsocialproof) {
       // Company found, send the response with the company data
@@ -34,12 +38,17 @@ export const GET = async (request: NextRequest, { params }: { params: Params }) 
 };
 
 
-export const PATCH = async (request:NextRequest) => {
-    try {
-        await connect();
+export const PATCH = async (request:NextRequest,{ params }: { params: Params }) => {
+     const { id } = params;
+  try {
+    await connect();
+     
+       if (!params.id) {
+      return new NextResponse("Invalid Company ID", { status: 400 });
+    }
         const reqBody = await request.json()
     
-     const {_id, ProofTitle,
+     const { ProofTitle,
 AddTags,
 Post,
 Platform,
@@ -47,10 +56,10 @@ PostLink,
 Comment,
 Reality,
 Images} = reqBody
-
+      
     // Find the experience record by id and update the specified fields
     const updateSocialProof = await socialproof.findByIdAndUpdate(
-      _id,
+      new mongoose.Types.ObjectId(id),
       { $set: { ProofTitle,
 AddTags,
 Post,

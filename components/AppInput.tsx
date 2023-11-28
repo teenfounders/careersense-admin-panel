@@ -138,7 +138,6 @@ const sizeMap: { [key in InputSize]: string } = {
 //     );
 //   }
 // );
-// AppInput.displayName = "AppInput";
 const AppInput = forwardRef<HTMLInputElement, InputProps>(
   (
     {
@@ -184,4 +183,5 @@ const AppInput = forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
+AppInput.displayName = "AppInput";
 export default AppInput;

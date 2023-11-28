@@ -42,12 +42,18 @@ import {
 import { useSocialProof } from "@/context/SocialProof";
 import router from "next/router";
 import { socialproof } from "@/models/social-proof";
+import { FaClosedCaptioning } from "react-icons/fa";
 interface Comment {
   id: number;
   text: string;
   comment?: string[] | string;
 }
 interface createSocialProof {
+  Images: string[] | null | undefined;
+  Open: boolean;
+}
+interface updateSocialProof {
+  _id?: string | null;
   ProofTitle?: string;
   AddTags?: string;
   Post?: string;
@@ -56,7 +62,6 @@ interface createSocialProof {
   Comment?: string[] | string;
   Reality?: string;
   Images: string[] | null | undefined;
-  Open: boolean;
 }
 type FormData = {
   prooftitle: string;
@@ -153,7 +158,6 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({ Open, Images }) => {
     queryKey: ["socialProofById", selectedSocialProofId], // Pass the selectedSocialProofId as part of the query key
     queryFn: () => fetchSocialProofById(selectedSocialProofId),
     enabled: false,
-    // Call the function with the selectedSocialProofId
   });
 
   const {
@@ -235,7 +239,8 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({ Open, Images }) => {
 
         setUploadedImages((prevImages) => [...prevImages, uploadedImage]);
         console.log("this is actual url", uploadedImage);
-        setUploadedImage(uploadedImage);
+        // setUploadedImage(uploadedImage);
+
         // Handle the imageUrl as needed in your application
       } catch (error) {
         console.error("Error uploading image:", error);
@@ -243,6 +248,7 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({ Open, Images }) => {
       }
     }
   };
+
   const onSubmit: SubmitHandler<FormData> = async (data, events) => {
     events?.preventDefault();
     setLoading(true);
@@ -273,6 +279,7 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({ Open, Images }) => {
     console.log(imagess);
     console.log(editor1Content, "this is e", editor2Content);
     const formData = {
+      _id: selectedSocialProofId,
       ProofTitle: prooftitle,
       AddTags: addtag,
       Post: editor1Content,
@@ -286,6 +293,7 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({ Open, Images }) => {
       //   CreateSocialProof.mutate(formData);
       // If the mutation is successful, you can refetch the data
       // await refetchSocialProofs();
+      UpdateSocialProof.mutate(formData);
       console.log(formData);
       setLoading(false);
       onClose();
@@ -315,11 +323,27 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({ Open, Images }) => {
     setOpenEditModal((prev) => prev === true && false);
     console.log(openEditModal);
   };
+  // const UpdateSocialProof = useMutation({
+  //   mutationFn: (FormData: updateSocialProof) =>
+  //     axios.patch(`/api/social-proof/${selectedSocialProofId}`, FormData),
+  //   onSettled: () =>
+  //     queryClient.invalidateQueries({ queryKey: ["socialProof"] }),
+  // });
+  const UpdateSocialProof = useMutation({
+    mutationFn: (FormData: updateSocialProof) =>
+      axios.patch(`/api/social-proof/${selectedSocialProofId}`, FormData),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ["socialProof"] }),
+  });
+  const fetchSocialProof = async () => {
+    const response = await axios.get(`/api/social-proof`);
+    return response;
+  };
 
   useEffect(() => {
     if (Open) {
       onOpen();
-
+      refetchSocialProof();
       // Trigger data fetching when modal is opened
     } else {
       onClose();

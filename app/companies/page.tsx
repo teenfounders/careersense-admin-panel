@@ -23,7 +23,7 @@ const Companies = () => {
     selectedCompanyId,
     setSelectedCompanyId,
     fetchData,
-    companyNames,
+    // companyNames,
   } = useCompany();
 
   const [open, setOpen] = useState(false);
@@ -40,28 +40,28 @@ const Companies = () => {
     // Navigate to the company page without exposing the company ID in the URL
     router.push(`/companies/${companyNamess}`);
   };
+  const fetchCompanyNames = async () => {
+    const response = await axios.get(`/api/companies`);
+    return response.data;
+  };
+  const { data: companyNames, isLoading, isError } = useQuery({
+    queryKey: ["companynames"],
+    queryFn: fetchCompanyNames,
+  });
+  // console.log(companyNames.companies);
+  // useEffect(() => {
+  // fetchData();
   // const fetchCompanyNames = async () => {
-  //   const response = await axios.get(`/api/companies`);
-  //   return response.data;
+  //   try {
+  //     const response = await axios.get(`/api/companies`);
+  //     const data = response.data; // Assuming `data.companies` contains the array of companies
+  //     setCompanyNames(data.companies);
+  //   } catch (error) {
+  //     console.error("Error fetching company names:", error);
+  //   }
   // };
-  // const { data: companyNames, isLoading, isError } = useQuery({
-  //   queryKey: ["companynames"],
-  //   queryFn: fetchCompanyNames,
-  // });
-
-  useEffect(() => {
-    fetchData();
-    // const fetchCompanyNames = async () => {
-    //   try {
-    //     const response = await axios.get(`/api/companies`);
-    //     const data = response.data; // Assuming `data.companies` contains the array of companies
-    //     setCompanyNames(data.companies);
-    //   } catch (error) {
-    //     console.error("Error fetching company names:", error);
-    //   }
-    // };
-    // fetchCompanyNames();
-  }, []);
+  // fetchCompanyNames();
+  // }, []);
   return (
     <main className="bg-[#fafafa] flex flex-col grow relative w-full  h-screen overflow-y-auto">
       {/* <header className="sticky z-20 top-0 shadow-md min-w-full bg-white border-b-[1px] border-[#dadada] min-h-[86px]  mb-0"> */}
@@ -85,10 +85,10 @@ const Companies = () => {
               </span>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 relative">
+            {/* <div className="grid grid-cols-3 gap-4 relative">
               {companyNames &&
                 companyNames.length > 0 &&
-                companyNames
+                companyNames.companies
                   .map((company: any, idx: any) => (
                     <div key={idx} className="text-[#4766cc]">
                       <Link
@@ -114,7 +114,7 @@ const Companies = () => {
                   ))
                   .reverse()}
 
-              {/* {isLoading && (
+              {isLoading && (
                 <div className="w-full mx-auto col-span-3  flex gap-3 justify-center  my-10 ">
                   <Image
                     src={loader}
@@ -133,8 +133,62 @@ const Companies = () => {
                   />
                   Something
                 </div>
-              )} */}
+              )}
+            </div> */}
+            <div className="grid grid-cols-3 gap-4 relative">
+              {isLoading ? (
+                <div className="w-full mx-auto col-span-3 flex gap-3 justify-center my-10">
+                  <Image
+                    src={loader}
+                    alt="loader"
+                    className="animate-spin invert"
+                  />
+                  Loading...
+                </div>
+              ) : isError ? (
+                <div className="w-full mx-auto col-span-3 flex gap-3 justify-center my-10">
+                  <Image
+                    src={loader}
+                    alt="loader"
+                    className="animate-spin invert"
+                  />
+                  Something went wrong...
+                </div>
+              ) : companyNames &&
+                companyNames.companies &&
+                companyNames.companies.length > 0 ? (
+                companyNames.companies
+                  .map((company: any, idx: any) => (
+                    <div key={idx} className="text-[#4766cc]">
+                      <Link
+                        href={{
+                          pathname: `/companies/${company.Company_Name.toLowerCase()}`,
+                          // query: {
+                          //   id: `${company._id}`,
+                          // },
+                        }}
+                        onClick={() =>
+                          handleCompanyClick(
+                            company._id || "",
+                            company.Company_Name.split(/[ -]/)[0]
+                          )
+                        }
+                        // as={`/companies/${company.Company_Name.toLowerCase()}`}
+                      >
+                        <span className="font-medium text-md text-[#4E71DA]">
+                          {company.Company_Name}
+                        </span>
+                      </Link>
+                    </div>
+                  ))
+                  .reverse()
+              ) : (
+                <div className="w-full mx-auto col-span-3 flex gap-3 justify-center my-10">
+                  No companies available.
+                </div>
+              )}
             </div>
+
             {/* </div> */}
             {/* </div> */}
           </div>

@@ -21,8 +21,7 @@ const Me = (props: Props) => {
 
   const url2 =
     "https://www.coursera.org/professional-certificates/tensorflow-in-practice";
-  const url1 =
-    "https://www.coursera.org/professional-certificates/tensorflow-in-practice";
+  const url1 = "https://www.cred.club";
 
   useEffect(() => {
     const fetchData = async () => {

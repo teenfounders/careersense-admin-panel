@@ -1,8 +1,7 @@
- @import "tailwindcss/base";
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
 
-@import "tailwindcss/components";
-
-@import "tailwindcss/utilities";
+@import 'tailwindcss/utilities';
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
@@ -15,6 +14,7 @@
 
 body {
    padding: 0;
+   background-color: blue;
    margin: 0;
    box-sizing: border-box;
 }

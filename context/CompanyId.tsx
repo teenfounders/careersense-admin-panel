@@ -33,16 +33,22 @@ export const CompanyProvider: React.FC<{ children: ReactNode }> = ({
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const [companyNames, setCompanyNames] = useState<ICompany[]>([]);
 
-  const { data: companyNamess, isLoading, isError } = useQuery({
+  const {
+    data: companyNamess,
+    isLoading,
+    isError,
+    refetch: companyname,
+  } = useQuery({
     queryKey: ["companynames"],
     queryFn: fetchCompanyNames,
   });
   const fetchData = async () => {
     try {
       console.log("first requred");
-      const data = await fetchCompanyNames();
-      console.log(data.companies); // Call your data fetching function
-      setCompanyNames(data.companies);
+      const data = await companyname();
+      console.log(data);
+      console.log(data.data.companies); // Call your data fetching function
+      setCompanyNames(data.data.companies);
       onClose(); // Update the state with fetched companies
     } catch (error) {
       console.error("Error fetching companies:", error);
