@@ -46,7 +46,7 @@ const APPButton = ({
       {text}
       {!disabled && !forwardimage && (
         <span
-          className="absolute right-3 top-[50%] transform -translate-y-1/2"
+          className="absolute right-1 top-[50%] transform -translate-y-1/2"
           style={{
             display: loading ? "none" : "block",
           }}
@@ -55,7 +55,7 @@ const APPButton = ({
             src={forwardArrowSrc || forwardarrow}
             width={10}
             height={10}
-            alt="arrow"
+            alt="arrow w-20 h-20"
           />
         </span>
       )}

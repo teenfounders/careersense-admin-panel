@@ -14,13 +14,13 @@ export const GET = async (request: NextRequest, { params }: { params: Params }) 
   const { id } = params;
   try {
     await connect();
-    console.log(id)
+    // console.log(id)
     
     if (!params.id) {
       return new NextResponse("Invalid Company ID", { status: 400 });
     }
     let ids =  new mongoose.Types.ObjectId(id)
-    console.log(ids)
+    // console.log(ids)
     const getsocialproof = await socialproof.findById(ids);
  
     if (getsocialproof) {
@@ -78,5 +78,34 @@ Images} }, // Specify the fields you want to update
   } catch (error: any) {
     console.error(error);
     return new NextResponse("Database Error", { status: 500 });
+  }
+};
+
+
+export const DELETE = async (
+  request: NextRequest,
+  { params }: { params: Params }
+) => {
+  const { id } = params;
+  try {
+    await connect();
+    // console.log(id)
+    
+    // Validate the company ID format
+    if (!id) {
+      return new NextResponse('Invalid Company ID', { status: 400 });
+    }
+
+    // Delete the company from the database
+    const deletedCompany = await socialproof.findByIdAndDelete(id);
+
+    if (!deletedCompany) {
+      return new NextResponse('Social not found', { status: 404 });
+    }
+
+    return new NextResponse('Social Proof deleted successfully', { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return new NextResponse('Database Error', { status: 500 });
   }
 };

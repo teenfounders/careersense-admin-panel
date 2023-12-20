@@ -128,19 +128,19 @@ const PostId = ({ params }: { params: { post: number } }) => {
                   <AppPostButton
                     classname="hover:scale-105  py-2 bg-[#fff] border-[#a6a6a6] items-center justify-center flex "
                     icon={heart}
-                    onClick={() => console.log("clieced by 1head")}
+                    onClick={() => {}}
                     label={"Like"}
                   />
                   <AppPostButton
                     classname="hover:scale-105   bg-[#fff] border-[#a6a6a6] items-center justify-center flex  py-2  "
                     icon={message}
-                    onClick={() => console.log("clieced by message")}
+                    onClick={() => {}}
                     label={"comment"}
                   />
                   <AppPostButton
                     classname="hover:scale-105  py-2 bg-[#fff] border-[#a6a6a6] items-center justify-center flex"
                     icon={bell}
-                    onClick={() => console.log("clieced by bell")}
+                    onClick={() => {}}
                     label={"Follow"}
                   />
                 </div>

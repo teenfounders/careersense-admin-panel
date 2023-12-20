@@ -72,15 +72,14 @@ export const SocialProofProvider: React.FC<{ children: ReactNode }> = ({
   const fetchSocialProofById = async () => {
     try {
       setSocialProofId((prev) => undefined);
-      console.log(SocialProofId);
+      // console.log(SocialProofId);
       const response = await axios
-        
+
         .get(`/api/social-proof/${selectedSocialProofId}`)
         .then((response: any) => {
-          console.log(response.data);
+          // console.log(response.data);
           setSocialProofId(response.data);
-        })
-         
+        });
 
       // Update the state with fetched companies
     } catch (error) {

@@ -1,16 +1,23 @@
  
  import { Company } from '@/models/companies';
-import { ICompany,IExperiencetrackerProps } from '@/utils/types';
-import { connect } from '@/dbConfig/dbConfig';
-import { NextRequest, NextResponse } from 'next/server'
-import { ExperienceTrackers } from '@/models/experience-tracker';
-interface Params {
-  id: string;  
-}
+ import { ICompany,IExperiencetrackerProps } from '@/utils/types';
+ import { connect } from '@/dbConfig/dbConfig';
+ import { NextRequest, NextResponse } from 'next/server'
+ import { ExperienceTrackers } from '@/models/experience-tracker';
+ interface Params {
+   id: string;  
+  }
+  interface GetSingleExperienceParams {
+    id: string;
+  }
+  
+  // Create a new GET route for fetching a single experience tracker by ID
+  
 
 
 export const GET = async (request: NextRequest, { params }: { params: Params }) => {
   const { id } = params;
+  
   try {
     await connect();
       
@@ -19,6 +26,7 @@ export const GET = async (request: NextRequest, { params }: { params: Params }) 
     }
     const experiencetrackers = await ExperienceTrackers.find({companyId:id});
     if (experiencetrackers) {
+      // console.log(experiencetrackers)
       // Company found, send the response with the company data
       return new NextResponse(JSON.stringify(experiencetrackers), { status: 200 });
     } else {
@@ -31,14 +39,13 @@ export const GET = async (request: NextRequest, { params }: { params: Params }) 
     return new NextResponse("Database Error", { status: 500 });
   }
 };
-
 export const POST = async (request:NextRequest): Promise<NextResponse> => {
   try {
     await connect();
       const reqBody = await request.json()  
       const {companyId,
-        role,
         experience,
+        role,
         url} = reqBody
         
         // Create a new instance of ExperienceTrackers model

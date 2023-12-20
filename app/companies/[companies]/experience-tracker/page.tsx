@@ -12,6 +12,8 @@ import downarrow from "@/assets/downarrow.svg";
 import cross from "@/assets/corss2.svg";
 import forwardarrow from "@/assets/forwardarrow.svg";
 import Image from "next/image";
+import loader from "@/assets/loder.svg";
+import toast, { Toaster } from "react-hot-toast";
 import {
   Modal,
   ModalContent,
@@ -31,6 +33,8 @@ import axios from "axios";
 import { IExperiencetrackerProps } from "@/utils/types";
 import { useCompany } from "@/context/CompanyId";
 import { useRouter } from "next/navigation";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import ExperienceModal from "@/components/ExperienceModal";
 // import { fetchCompanyData } from "@/lib/action";
 type Inputs = {
   role: string;
@@ -38,118 +42,145 @@ type Inputs = {
 };
 
 type Props = {};
+
+interface updateformdataexperience {
+  _id?: string;
+  role?: string;
+  experience?: string; // Assuming campusPartner corresponds to experience
+  url?: string;
+}
 const initialState = {
   role: "",
   experience: "",
 };
 const ExperienceTracker = (props: Props) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
+
   const [getEditId, setGetEditId] = useState("");
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<Inputs>();
+  const [openEditor, setOpenEditor] = useState<boolean>(false);
   const [experienceTracker, setExperiencTracker] = useState<
     IExperiencetrackerProps
   >();
-  const { setSelectedCompanyId, selectedCompanyId } = useCompany();
+  const {
+    setSelectedCompanyId,
+    selectedCompanyId,
+    setselectedExperienceId,
+  } = useCompany();
 
   const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
   const searchParams = useSearchParams();
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const [selectedCard, setSelectedCard] = useState<IExperiencetrackerProps>();
-  const id = searchParams.get("id");
+  // const id = searchParams.get("id");
   const [name, setName] = useState(initialState);
   const [error, setError] = useState(false);
+  const [deleteExp, setDeleteExp] = useState<string | "">("");
   const [loading, setLoading] = useState(false);
   const pat = useParams();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm<Inputs>();
+  // const onSubmit: SubmitHandler<Inputs> = async (data, events) => {
+  //   console.log("Form Data:", data);
+  //   console.log(watch());
+  // };
 
   const handleEditExperience = (experience: IExperiencetrackerProps) => {
     setGetEditId(experience._id);
-    setSelectedCard(experience);
-    setModalMode("edit");
-    setName({
-      role: experience.role,
-      experience: experience.experience,
-    });
-    onOpen();
+    setselectedExperienceId(experience._id);
+    // setSelectedCard(experience);
+
+    // setModalMode("edit");
+    // setName({
+    //   role: experience.role,
+    //   experience: experience.experience,
+    // });
+    // onOpen();
+    setOpenEditor((prev) => !prev);
 
     // Open the modal
   };
+  const handleDelete = (experience: IExperiencetrackerProps) => {
+    setDeleteExp(experience._id);
+    if (confirm("Are you sure you want to delete this experience?")) {
+      deleteCompanyMutation.mutate();
+    }
+  };
 
+  const deleteCompanyMutation = useMutation({
+    mutationFn: () =>
+      axios.delete(
+        `/api/companies/${selectedCompanyId}/experience-tracker/${deleteExp}`
+      ),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ["experiencecompany"] }),
+    onSuccess: () => {
+      toast.success("Company deleted successfully");
+
+      // Invalidate and refetch the query to update the list
+      setDeleteExp("");
+      // Redirect to the home page
+    },
+    onError: (error) => {
+      console.error("Error deleting company:", error);
+      toast.error("Error deleting company");
+    },
+  });
   const resetForm = () => {
     setName({ role: "", experience: "" });
     setError(false);
     // setLoader(false);
   };
+
   const handleEditSubmit: SubmitHandler<Inputs> = (data) => {
     // console.log(data);
-    try {
-      const formData = {
-        _id: getEditId, // Replace this with the actual companyId value
-        role: data.role,
-        experience: data.experience, // Assuming campusPartner corresponds to experience
-        // Replace this with the actual URL value
-      };
-
-      setLoading(true);
-      console.log(selectedCompanyId);
-      // Make a PATCH request to update the existing experience
-      axios
-        .patch(
-          `/api/companies/${selectedCompanyId}/experience-tracker`,
-          formData
-        )
-        .then((response) => {
-          console.log(response);
-          // Handle the response accordingly, update local state if needed
-        })
-        .catch((error) => {
-          console.error("Error updating experience:", error);
-          // Handle error state or display error message to the user
-        })
-        .finally(() => {
-          setLoading(false); // Set loading state to false regardless of success or failure
-          onClose(); // Close the modal after successful submission
-        });
-    } catch (error) {
-      console.error("Error updating experience:", error);
-      // Handle error state or display error message to the user
-    }
+    // console.log(data);
+    // setLoading(true);
+    // try {
+    //   const formData = {
+    //     _id: getEditId, // Replace this with the actual companyId value
+    //     role: data.role,
+    //     experience: data.experience, // Assuming campusPartner corresponds to experience
+    //     // Replace this with the actual URL value
+    //   };
+    //   updateExpereinceTracker.mutate(formData);
+    //   setLoading(false);
+    //   // Make a PATCH request to update the existing experience
+    // } catch (error) {
+    //   console.error("Error updating experience:", error);
+    //   // Handle error state or display error message to the user
+    // }
   };
-  console.log(selectedCompanyId);
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
+  const onSubmit: SubmitHandler<Inputs> = async (data, events) => {
+    events?.preventDefault();
+    setLoading(true);
+    const {
+      role,
+      experience,
+
+      // editor1Content,
+      // editor2Content,
+    } = data;
+    // console.log(role);
+    // console.log(experience);
+
     try {
       const formData = {
         companyId: selectedCompanyId,
-        role: data.role,
-        experience: data.experience, // Assuming campusPartner corresponds to experience
+        role: role,
+        experience: experience, // Assuming campusPartner corresponds to experience
         url: "https://www.google.com/", // Replace this with the actual URL value
       };
-
+      // console.log(formData);
       setLoading(true);
-      // Make a POST request to your API endpoint with the formData
-      axios
-        .post(
-          `/api/companies/${selectedCompanyId}/experience-tracker`,
-          formData
-        )
-        .then((response) => {
-          onClose(); // Close the modal after successful submission
-        })
-        .catch((error) => {
-          console.error("Error submitting form:", error);
-          // Handle error state or display error message to the user
-        });
-
-      // Assuming the API response contains the updated experience tracker data
-      // Update your local state or re-fetch the experience tracker data to reflect the changes
-      // Example: setExperiencTracker(response.data);
-
-      // Close the modal after successful submission
+      createExpereinceTracker.mutate(formData);
+      toast.success("Successfully created!");
       setLoading(false);
       onClose();
     } catch (error) {
@@ -157,32 +188,65 @@ const ExperienceTracker = (props: Props) => {
       // Handle error state or display error message to the user
     }
   };
+  const fetchExperienceTracker = async () => {
+    const response = await axios.get(
+      `/api/companies/${selectedCompanyId}/experience-tracker`
+    );
+    // console.log(response.data);
+    return response.data;
+  };
+  const {
+    data: experienceCompanyByid,
+    refetch: refetchexperienceCompanyByid,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["experiencecompany"],
+    queryFn: fetchExperienceTracker,
+    // enabled: false,
+  });
 
-  React.useEffect(() => {
-    const fetchCompanyData = async () => {
-      if (selectedCompanyId === null) {
-        router.push("/companies");
-      }
-      try {
-        const response = await axios(
-          `/api/companies/${selectedCompanyId}/experience-tracker`
-        );
-        const data = response.data; // Assuming the API response is an object containing the company data
-        setExperiencTracker(data);
-      } catch (error) {
-        console.error("Error fetching company data:", error);
-      }
-    };
+  // React.useEffect(() => {
+  //   const fetchCompanyData = async () => {
+  //     if (selectedCompanyId === null) {
+  //       router.push("/companies");
+  //     }
+  //     try {
+  //       const response = await axios(
+  //         `/api/companies/${selectedCompanyId}/experience-tracker`
+  //       );
+  //       const data = response.data; // Assuming the API response is an object containing the company data
+  //       setExperiencTracker(data);
+  //     } catch (error) {
+  //       console.error("Error fetching company data:", error);
+  //     }
+  //   };
 
-    fetchCompanyData();
-  }, [id, selectedCompanyId, router]);
-
+  //   fetchCompanyData();
+  // }, [id, selectedCompanyId, router]);
+  const updateExpereinceTracker = useMutation({
+    mutationFn: (formData: updateformdataexperience) =>
+      axios.patch(
+        `/api/companies/${selectedCompanyId}/experience-tracker`,
+        formData
+      ),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ["experiencecompany"] }),
+  });
+  const createExpereinceTracker = useMutation({
+    mutationFn: (formData: Inputs) =>
+      axios.post(
+        `/api/companies/${selectedCompanyId}/experience-tracker`,
+        formData
+      ),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ["experiencecompany"] }),
+  });
   React.useEffect(() => {
     if (isOpen) {
-      resetForm();
     }
     if (!isOpen) {
-      resetForm();
+      reset();
     }
   }, [onOpenChange, isOpen]);
 
@@ -199,16 +263,41 @@ const ExperienceTracker = (props: Props) => {
       <div className="my-5 mx-auto w-full  max-w-5xl  bg-[#FFFFFF] min-h-[363px] p-3 border-[1px]  shadow-sm border-[#D7D7D7]  ">
         {/* <div className="max-w-full  bg-[#FFFFFF] min-h-[363px] p-3 border-[1px]  shadow-sm border-[#D7D7D7]  "> */}
         <div className=" mx-auto   w-full   grid  grid-cols-1 sm:grid-cols-2 md:grid-cols-3 grid-rows-auto gap-1 justify-stretch items-stretch   ">
-          {experienceTracker &&
-            experienceTracker.map((experience, idx) => (
-              <div key={idx}>
+          {isLoading ? (
+            <div className="w-full mx-auto col-span-3 flex gap-3 justify-center my-10">
+              <Image
+                src={loader}
+                alt="loader"
+                className="animate-spin invert"
+              />
+              Loading...
+            </div>
+          ) : isError ? (
+            <div className="w-full mx-auto col-span-3 flex gap-3 justify-center my-10">
+              <Image
+                src={loader}
+                alt="loader"
+                className="animate-spin invert"
+              />
+              Something went wrong...
+            </div>
+          ) : experienceCompanyByid ? (
+            experienceCompanyByid.map((experience: any, idx: any) => (
+              <div key={experience._id}>
                 <AppExpereinceCard
-                  title={experience.role}
+                  _id={experience._id}
+                  deleteExperience={() => handleDelete(experience)}
+                  role={experience.role}
                   experience={experience.experience}
                   edit={() => handleEditExperience(experience)} // Pass the experience data
                 />
               </div>
-            ))}
+            ))
+          ) : (
+            <div className="w-full mx-auto col-span-3 flex gap-3 justify-center my-10">
+              No Data available.
+            </div>
+          )}
         </div>
       </div>
       <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="top-center">
@@ -219,78 +308,55 @@ const ExperienceTracker = (props: Props) => {
                 {modalMode === "add" ? "Add Experience" : "Edit Experience"}
               </ModalHeader>
               <ModalBody>
-                {modalMode === "add" ? (
-                  <form
-                    className="flex relative  flex-col gap-3"
-                    onSubmit={handleSubmit(onSubmit)}
-                  >
-                    <AppInput
-                      type="text"
-                      label="role"
-                      id="role"
-                      // value={name.jobtitle}
-                      // name="jobtitle"
-                      classname="w-full text-sm  h-[40px] "
-                      errors={error}
-                      defaultValue={name.role}
-                      {...register("role")}
-                      // onChange={handleInputChange}
-                      placeholder="Job/Internship Title"
+                {/* {modalMode === "add" ? ( */}
+                <form
+                  onSubmit={handleSubmit(onSubmit)}
+                  className="flex relative  flex-col gap-3"
+                >
+                  <AppInput
+                    type={"text"}
+                    label={""}
+                    {...register("role")}
+                    classname="w-full text-sm placeholder:text-sm h-[40px] "
+                    placeholder="Role"
+                  />
+                  <AppInput
+                    type={"text"}
+                    label={""}
+                    {...register("experience")}
+                    classname="w-full text-sm placeholder:text-sm h-[40px] "
+                    placeholder="Experience"
+                  />
+                  <div className="w-full flex justify-end">
+                    <APPButton
+                      classname="flex items-center w-20 justify-center capitalize rounded-xl bg-blue-600 text-white"
+                      type="submit"
+                      text={"Save"}
+                      loading={loading}
+                      forwardimage
                     />
-                    <AppInput
-                      type="text"
-                      label=""
-                      id="experience"
-                      // value={name.experience}
-                      classname="w-full text-sm  h-[40px]"
-                      errors={error}
-                      defaultValue={name.experience}
-                      {...register("experience")}
-                      // onChange={handleInputChange}
-                      placeholder="Experience Required"
-                    />
-                    <div
-                      className="w-full flex justify-end"
-                      onClick={() => onClose()}
-                    >
-                      <APPButton
-                        classname="flex items-center w-20  justify-center capitalize rounded-xl bg-blue-600 text-white"
-                        type="submit"
-                        text={"Save"}
-                        loading={loading}
-                        forwardimage
-                      />
-                    </div>
-                  </form>
-                ) : (
-                  <form
+                  </div>
+                </form>
+                {/* ) : ( */}
+                {/* <form
                     className="flex relative  flex-col gap-3"
                     onSubmit={handleSubmit(handleEditSubmit)}
                   >
                     <AppInput
-                      type="text"
-                      label="role"
-                      id="role"
-                      // value={name.jobtitle}
-                      // name="jobtitle"
-                      classname="w-full text-sm  h-[40px] "
-                      errors={error}
-                      defaultValue={name.role}
+                      type={"text"}
+                      label={""}
+                      // value={}
+
                       {...register("role")}
-                      // onChange={handleInputChange}
-                      placeholder="Job/Internship Title"
+                      classname="w-full text-sm placeholder:text-sm h-[40px] "
+                      placeholder="edit role"
                     />
                     <AppInput
-                      type="text"
-                      label=""
-                      id="experience"
-                      // value={name.experience}
-                      classname="w-full text-sm  h-[40px]"
-                      errors={error}
-                      defaultValue={name.experience}
+                      type={"text"}
+                      label={""}
                       {...register("experience")}
-                      // onChange={handleInputChange}
-                      placeholder="Experience Required"
+                      classname="w-full text-sm placeholder:text-sm h-[40px] "
+                      placeholder="edit experience"
                     />
                     <div
                       className="w-full flex justify-end"
@@ -304,8 +370,8 @@ const ExperienceTracker = (props: Props) => {
                         forwardimage
                       />
                     </div>
-                  </form>
-                )}
+                  </form> */}
+                {/* )} */}
               </ModalBody>
               {/* <ModalFooter>
                 <Button type="submit" color="primary" onPress={onClose}>
@@ -316,6 +382,15 @@ const ExperienceTracker = (props: Props) => {
           )}
         </ModalContent>
       </Modal>
+      <div className="">
+        {openEditor && (
+          <ExperienceModal
+            onclose={setOpenEditor}
+            refetchexperienceCompanyByid={refetchexperienceCompanyByid}
+            Open={openEditor}
+          />
+        )}
+      </div>
     </div>
   );
 };

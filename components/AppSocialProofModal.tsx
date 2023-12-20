@@ -43,6 +43,7 @@ import { useSocialProof } from "@/context/SocialProof";
 import router from "next/router";
 import { socialproof } from "@/models/social-proof";
 import { FaClosedCaptioning } from "react-icons/fa";
+import toast from "react-hot-toast";
 interface Comment {
   id: number;
   text: string;
@@ -51,6 +52,7 @@ interface Comment {
 interface createSocialProof {
   Images: string[] | null | undefined;
   Open: boolean;
+  refetchSocialProofs: () => void;
 }
 interface updateSocialProof {
   _id?: string | null;
@@ -59,13 +61,12 @@ interface updateSocialProof {
   Post?: string;
   Platform?: string;
   PostLink?: string;
-  Comment?: string[] | string;
+  Comment?: string[] | null;
   Reality?: string;
-  Images: string[] | null | undefined;
+  Images: string[] | undefined;
 }
 type FormData = {
   prooftitle: string;
-
   addtag: string;
   comment: string[] | string;
   platform: string;
@@ -77,12 +78,17 @@ type FormData = {
 };
 type Props = {};
 
-const AppSocialProofModal: React.FC<createSocialProof> = ({ Open, Images }) => {
+const AppSocialProofModal: React.FC<createSocialProof> = ({
+  refetchSocialProofs,
+  Open,
+  Images,
+}) => {
   const firstInputRef = useRef<HTMLInputElement>(null);
 
   const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
   const [editor1Content, setEditor1Content] = useState("");
   const [editor2Content, setEditor2Content] = useState("");
+  const [proofId, setProofId] = useState<string | "">("");
   const {
     selectedSocialProofId,
     setSelectedSocialProofId,
@@ -105,7 +111,7 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({ Open, Images }) => {
     const response = await axios.get(
       `/api/social-proof/${selectedSocialProofId}`
     );
-    console.log(response.data);
+
     if (response) {
       let {
         ProofTitle,
@@ -148,7 +154,7 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({ Open, Images }) => {
 
     return response.data; // Assuming the data you want is in response.data
   };
-
+  // Initial get data selected proof
   const {
     data: socialProofData,
     refetch: refetchSocialProof,
@@ -169,7 +175,7 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({ Open, Images }) => {
     setValue,
     formState: { errors },
   } = useForm<FormData>();
-
+  // bunch of state
   const [uploadedImage, setUploadedImage] = useState<
     ImagekitResType | string[] | string | null | undefined
   >(Images);
@@ -184,12 +190,12 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({ Open, Images }) => {
   const [editor1, setEditor1] = useState("");
 
   const onEditorChange1 = (content: string) => {
-    console.log("editor1 ", content);
+    // console.log("editor1 ", content);
     setEditor1Content(content);
   };
 
   const onEditorChange2 = (content: string) => {
-    console.log("editor2 ", content);
+    // console.log("editor2 ", content);
     setEditor2Content(content);
   };
 
@@ -210,12 +216,26 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({ Open, Images }) => {
     // Clear the input field
     setMainComment("");
   };
-  const handleCommentDelete = (id: number) => {
-    if (comments) {
-      const updatedComments = comments.filter((comment) => comment.id !== id);
-      setComments(updatedComments);
-    }
+  const handleCommentEdit = (index: number, newText: string) => {
+    // Update the 'comments' state with the edited comment
+    const updatedComments = [...comments];
+    updatedComments[index].text = newText;
+    setComments(updatedComments);
   };
+  const handleCommentDelete = (index: number) => {
+    // Update the 'comments' state by removing the comment at the specified index
+    const updatedComments = [...comments];
+    updatedComments.splice(index, 1);
+    setComments(updatedComments);
+  };
+  // const handleCommentDelete = (id: number) => {
+  //   if (comments) {
+  //     // const updatedComments = comments.filter((comment) => comment.id !== id);
+  //     const updatedComments = [...comments];
+  //     updatedComments.splice(id, 1);
+  //     setComments(updatedComments);
+  //   }
+  // };
   const deleteImage = (index: number): void => {
     const updatedImages = [...uploadedImages];
     updatedImages.splice(index, 1);
@@ -237,8 +257,8 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({ Open, Images }) => {
 
         // console.log("Image uploaded successfully. Image URL:", imageUrl);
 
-        setUploadedImages((prevImages) => [...prevImages, uploadedImage]);
-        console.log("this is actual url", uploadedImage);
+        // console.log("this is actual url", uploadedImage);
+        setUploadedImages((prevImages) => [...prevImages, uploadedImage.url]);
         // setUploadedImage(uploadedImage);
 
         // Handle the imageUrl as needed in your application
@@ -248,6 +268,57 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({ Open, Images }) => {
       }
     }
   };
+
+  const handlemodalstate = () => {
+    setSocialProofId(undefined);
+    setOpenEditModal((prev) => prev === true && false);
+    // console.log(openEditModal);
+  };
+  // const UpdateSocialProof = useMutation({
+  //   mutationFn: (FormData: updateSocialProof) =>
+  //     axios.patch(`/api/social-proof/${selectedSocialProofId}`, FormData),
+  //   onSettled: () =>
+  //     queryClient.invalidateQueries({ queryKey: ["socialProof"] }),
+  // });
+  const UpdateSocialProof = useMutation({
+    mutationFn: (FormData: updateSocialProof) =>
+      axios.patch(`/api/social-proof/${selectedSocialProofId}`, FormData),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ["socialProof"] }),
+  });
+  const fetchSocialProof = async () => {
+    const response = await axios.get(`/api/social-proof`);
+    return response;
+  };
+
+  // delete
+  const handleDelete = (selectedSocialProofId?: string) => {
+    if (confirm("Are you sure you want to delete this Post?")) {
+      deleteCompanyMutation.mutate();
+    }
+  };
+
+  const deleteCompanyMutation = useMutation({
+    mutationFn: () =>
+      axios.delete(`/api/social-proof/${selectedSocialProofId}`),
+    onSettled: () => {
+      refetchSocialProofs();
+      refetchSocialProofs(),
+        queryClient.invalidateQueries({ queryKey: ["experiencecompany"] });
+    },
+
+    onSuccess: () => {
+      toast.success("Company deleted successfully");
+      setOpenEditModal((prev) => prev === true && false);
+      // Invalidate and refetch the query to update the list
+
+      // Redirect to the home page
+    },
+    onError: (error) => {
+      console.error("Error deleting company:", error);
+      toast.error("Error deleting company");
+    },
+  });
 
   const onSubmit: SubmitHandler<FormData> = async (data, events) => {
     events?.preventDefault();
@@ -269,16 +340,18 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({ Open, Images }) => {
     let additionalComments: string[] = [];
     if (comments && comments.length > 0) {
       additionalComments = comments.map((comment) => comment.text);
-      console.log(additionalComments);
+      // console.log(additionalComments);
     }
 
     // Combine the main comment and additional comments into a single array
-    const allComments = [mainComment, ...additionalComments];
+    const allComments = [mainComment, ...additionalComments].filter(
+      (comment) => comment.trim() !== ""
+    );
 
-    let imagess: string[] = uploadedImages.map((img: any) => img?.url);
-    console.log(imagess);
-    console.log(editor1Content, "this is e", editor2Content);
-    const formData = {
+    let imagess: string[] = uploadedImages.map((img: any) => img);
+    // console.log(imagess);
+    // console.log(editor1Content, "this is e", editor2Content);
+    const formData: updateSocialProof = {
       _id: selectedSocialProofId,
       ProofTitle: prooftitle,
       AddTags: addtag,
@@ -294,7 +367,8 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({ Open, Images }) => {
       // If the mutation is successful, you can refetch the data
       // await refetchSocialProofs();
       UpdateSocialProof.mutate(formData);
-      console.log(formData);
+      toast.success("Post Successfully Created");
+      // console.log(formData);
       setLoading(false);
       onClose();
       reset();
@@ -318,32 +392,11 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({ Open, Images }) => {
     // Assuming you have a `reset` function from the `useForm` hook
   };
 
-  const handlemodalstate = () => {
-    setSocialProofId(undefined);
-    setOpenEditModal((prev) => prev === true && false);
-    console.log(openEditModal);
-  };
-  // const UpdateSocialProof = useMutation({
-  //   mutationFn: (FormData: updateSocialProof) =>
-  //     axios.patch(`/api/social-proof/${selectedSocialProofId}`, FormData),
-  //   onSettled: () =>
-  //     queryClient.invalidateQueries({ queryKey: ["socialProof"] }),
-  // });
-  const UpdateSocialProof = useMutation({
-    mutationFn: (FormData: updateSocialProof) =>
-      axios.patch(`/api/social-proof/${selectedSocialProofId}`, FormData),
-    onSettled: () =>
-      queryClient.invalidateQueries({ queryKey: ["socialProof"] }),
-  });
-  const fetchSocialProof = async () => {
-    const response = await axios.get(`/api/social-proof`);
-    return response;
-  };
-
   useEffect(() => {
     if (Open) {
       onOpen();
       refetchSocialProof();
+      setMainComment("");
       // Trigger data fetching when modal is opened
     } else {
       onClose();
@@ -381,7 +434,7 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({ Open, Images }) => {
                             label=""
                             placeholder="Proof Title"
                             {...register("prooftitle")} // Make sure to include this line
-                            classname="w-full text-sm placeholder:text-sm h-[40px] tracking-[-0.015em]"
+                            classname="w-full  text-sm placeholder:text-sm h-[40px] tracking-[-0.015em]"
                           />
                         </div>
                         <div className="w-full ">
@@ -441,30 +494,55 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({ Open, Images }) => {
                               </button>
                             </div>
                           </div>
-
-                          {comments?.map((c, index) => (
-                            <div key={index} className="">
-                              <AppTextarea
-                                placeholder="Comment...."
-                                defaultValue={c.text}
-                                onChange={(e) => {
-                                  const updatedComments = [...comments];
-                                  updatedComments[index].text = e.target.value;
-                                  setComments(updatedComments);
-                                }}
-                                className="placeholder:text-[#666666] w-full rounded-md h-full border-[1px] border-gray-300 p-3 "
-                              />
-                              <div className="flex justify-end gap-2 items-center w-full">
-                                <button
-                                  type="button"
-                                  onClick={() => handleCommentDelete(index)}
-                                  className="text-xs font-semibold text-[#E51010]"
-                                >
-                                  Delete Comment
-                                </button>
+                          {comments
+                            ?.map((c, index) => (
+                              <div key={index} className="">
+                                <textarea
+                                  placeholder="Comment...."
+                                  value={c.text}
+                                  onChange={(e) =>
+                                    handleCommentEdit(index, e.target.value)
+                                  }
+                                  className="placeholder:text-[#666666] w-full rounded-md h-full border-[1px] border-gray-300 p-3 "
+                                />
+                                <div className="flex justify-end gap-2 items-center w-full">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCommentDelete(index)}
+                                    className="text-xs font-semibold text-[#E51010]"
+                                  >
+                                    Delete Comment
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            ))
+                            .reverse()}
+                          {/* {comments
+                            ?.map((c, index) => (
+                              <div key={index} className="">
+                                <AppTextarea
+                                  placeholder="Comment...."
+                                  defaultValue={c.text}
+                                  onChange={(e) => {
+                                    const updatedComments = [...comments];
+                                    updatedComments[index].text =
+                                      e.target.value;
+                                    setComments([...updatedComments]);
+                                  }}
+                                  className="placeholder:text-[#666666] w-full rounded-md h-full border-[1px] border-gray-300 p-3 "
+                                />
+                                <div className="flex justify-end gap-2 items-center w-full">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCommentDelete(index)}
+                                    className="text-xs font-semibold text-[#E51010]"
+                                  >
+                                    Delete Comment
+                                  </button>
+                                </div>
+                              </div>
+                            ))
+                            .reverse()} */}
                         </div>
                         <div className="">
                           <TipTapEditor
@@ -472,45 +550,55 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({ Open, Images }) => {
                             onEditorContentChange={onEditorChange2}
                           />
                         </div>
+                        <div className="flex w-full py-5 items-start justify-end   gap-10">
+                          <label className="px-3 flex gap-1 py-2 text-[12.5px] text-[#666666] font-medium bg-transparent border-[1px] border-gray-300 rounded-md cursor-pointer">
+                            <span>Add</span>
+                            <span>Image</span>
+                            <input
+                              type="file"
+                              onChange={uploadAvatar}
+                              className="hidden"
+                              accept=".jpg, .jpeg, .png"
+                            />
+                          </label>
+                          <div className="flex flex-col gap-3 w-full">
+                            {uploadedImages.map((image: any, index) => (
+                              <div
+                                key={index}
+                                className="flex gap-3 items-center"
+                              >
+                                <span className="text-[12.5px]  text-black w-full overflow-x-hidden">
+                                  {image}
+                                </span>
+                                <button
+                                  className="text-red-500 text-[12.5px]"
+                                  onClick={() => deleteImage(index)}
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            ))}
+                            {errors.images && (
+                              <span className="text-red-500">
+                                {errors.images.message}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </>
                     )}
                   </div>
 
-                  <div className="flex w-full py-5 items-end justify-end   gap-10">
-                    <label className="px-3 flex gap-1 py-2 text-[12.5px] text-[#666666] font-medium bg-transparent border-[1px] border-gray-300 rounded-md cursor-pointer">
-                      <span>Add</span>
-                      <span>Image</span>
-                      <input
-                        type="file"
-                        onChange={uploadAvatar}
-                        className="hidden"
-                        accept=".jpg, .jpeg, .png"
-                      />
-                    </label>
-                    <div className="flex flex-col gap-3 w-full">
-                      {uploadedImages.map((image: any, index) => (
-                        <div key={index} className="flex gap-3 items-center">
-                          <span className="text-[12.5px] text-black w-full overflow-x-hidden">
-                            {image}
-                          </span>
-                          <button
-                            className="text-red-500 text-[12.5px]"
-                            onClick={() => deleteImage(index)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      ))}
-                      {errors.images && (
-                        <span className="text-red-500">
-                          {errors.images.message}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
                   <div className="w-full  sticky -bottom-2 h-full min-w-full bg-white pt-5 py-2 z-50 flex flex-col justify-end">
-                    <div className=" flex w-full justify-end items-end">
+                    <div className=" flex w-full gap-2 justify-end items-end">
+                      <APPButton
+                        classname="flex items-center w-20  justify-center capitalize rounded-xl bg-red-600 text-white"
+                        type="button"
+                        text={"Delete"}
+                        loading={loading}
+                        onClick={() => handleDelete()}
+                        forwardimage
+                      />
                       <APPButton
                         classname="flex items-center w-20  justify-center capitalize rounded-xl bg-blue-600 text-white"
                         type="submit"

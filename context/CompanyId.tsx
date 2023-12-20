@@ -14,6 +14,8 @@ import React, {
 
 interface CompanyContextProps {
   selectedCompanyId: string | null;
+  selectedExperienceId: string | null;
+  setselectedExperienceId: React.Dispatch<React.SetStateAction<string | null>>;
   setSelectedCompanyId: React.Dispatch<React.SetStateAction<string | null>>;
   companyNames: ICompany[];
   fetchData: () => void;
@@ -30,6 +32,9 @@ export const CompanyProvider: React.FC<{ children: ReactNode }> = ({
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(
     null
   );
+  const [selectedExperienceId, setselectedExperienceId] = useState<
+    string | null
+  >(null);
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const [companyNames, setCompanyNames] = useState<ICompany[]>([]);
 
@@ -44,10 +49,10 @@ export const CompanyProvider: React.FC<{ children: ReactNode }> = ({
   });
   const fetchData = async () => {
     try {
-      console.log("first requred");
+      // console.log("first requred");
       const data = await companyname();
-      console.log(data);
-      console.log(data.data.companies); // Call your data fetching function
+      // console.log(data);
+      // console.log(data.data.companies); // Call your data fetching function
       setCompanyNames(data.data.companies);
       onClose(); // Update the state with fetched companies
     } catch (error) {
@@ -66,6 +71,8 @@ export const CompanyProvider: React.FC<{ children: ReactNode }> = ({
         selectedCompanyId,
         setSelectedCompanyId,
         companyNames,
+        selectedExperienceId,
+        setselectedExperienceId,
         fetchData,
 
         onClose,

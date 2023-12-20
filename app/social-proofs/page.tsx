@@ -94,12 +94,12 @@ const SocialProofs = () => {
   const [editor1, setEditor1] = useState("");
 
   const onEditorChange1 = (content: string) => {
-    console.log("editor1 ", content);
+    // console.log("editor1 ", content);
     setEditor1Content(content);
   };
 
   const onEditorChange2 = (content: string) => {
-    console.log("editor2 ", content);
+    // console.log("editor2 ", content);
     setEditor2Content(content);
   };
   // const [openEditModal, setOpenEditModal] = useState(false);
@@ -122,11 +122,20 @@ const SocialProofs = () => {
     // Clear the input field
     setMainComment("");
   };
-  const handleCommentDelete = (id: number) => {
-    if (comments) {
-      const updatedComments = comments.filter((comment) => comment.id !== id);
-      setComments(updatedComments);
-    }
+  const handleCommentDelete = (index: number) => {
+    const updatedComments = [...comments];
+    updatedComments.splice(index, 1);
+    setComments(updatedComments);
+    // if (comments) {
+    //   const updatedComments = comments.filter((comment) => comment.id !== id);
+    //   setComments(updatedComments);
+    // }
+  };
+  const handleCommentEdit = (index: number, newText: string) => {
+    // Update the 'comments' state with the edited comment
+    const updatedComments = [...comments];
+    updatedComments[index].text = newText;
+    setComments(updatedComments);
   };
   const fetchSocialProof = async () => {
     const response = await axios.get(`/api/social-proof`);
@@ -153,15 +162,15 @@ const SocialProofs = () => {
     let additionalComments: string[] = [];
     if (comments && comments.length > 0) {
       additionalComments = comments.map((comment) => comment.text);
-      console.log(additionalComments);
+      // console.log(additionalComments);
     }
 
     // Combine the main comment and additional comments into a single array
     const allComments = [mainComment, ...additionalComments];
 
     let imagess: string[] = uploadedImages.map((img: any) => img?.url);
-    console.log(imagess);
-    console.log(editor1Content, "this is e", editor2Content);
+    // console.log(imagess);
+    // console.log(editor1Content, "this is e", editor2Content);
     const formData = {
       ProofTitle: prooftitle,
       AddTags: addtag,
@@ -295,6 +304,7 @@ const SocialProofs = () => {
 
   //   fetchSocialProofById();
   // }, [selectedSocialProofId]);
+
   const CreateSocialProof = useMutation({
     mutationFn: (FormData: createSocialProof) =>
       axios.post("/api/social-proof", FormData),
@@ -328,7 +338,9 @@ const SocialProofs = () => {
               text={"New Proof"}
             />{" "}
           </Link> */}
-          <Button onPress={onOpen}>new proof</Button>
+          <Button onPress={onOpen} color="primary">
+            new proof
+          </Button>
 
           <Modal
             isOpen={isOpen}
@@ -439,14 +451,83 @@ const SocialProofs = () => {
                             </div>
                           ))}
                         </div> */}
-                        <div className="w-full flex flex-col">
+                        <div className="w-full flex flex-col ">
                           <div className="">
                             <AppTextarea
                               placeholder="Comment...."
                               {...register("comment")}
                               value={mainComment}
                               onChange={(e) => setMainComment(e.target.value)}
-                              className="placeholder:text-[#666666] "
+                              className="placeholder:text-[#666666] w-full h-full rounded-md border-[1px] border-gray-300 p-3"
+                            />
+                            <div className="flex justify-end gap-2 items-center w-full">
+                              <button
+                                type="button"
+                                onClick={() => handleComment()}
+                                className="text-xs font-semibold text-[#4E71DA]"
+                              >
+                                Add Comment
+                              </button>
+                            </div>
+                          </div>
+                          {comments
+                            ?.map((c, index) => (
+                              <div key={index} className="">
+                                <textarea
+                                  placeholder="Comment...."
+                                  value={c.text}
+                                  onChange={(e) =>
+                                    handleCommentEdit(index, e.target.value)
+                                  }
+                                  className="placeholder:text-[#666666] w-full rounded-md h-full border-[1px] border-gray-300 p-3 "
+                                />
+                                <div className="flex justify-end gap-2 items-center w-full">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCommentDelete(index)}
+                                    className="text-xs font-semibold text-[#E51010]"
+                                  >
+                                    Delete Comment
+                                  </button>
+                                </div>
+                              </div>
+                            ))
+                            .reverse()}
+                          {/* {comments
+                            ?.map((c, index) => (
+                              <div key={index} className="">
+                                <AppTextarea
+                                  placeholder="Comment...."
+                                  defaultValue={c.text}
+                                  onChange={(e) => {
+                                    const updatedComments = [...comments];
+                                    updatedComments[index].text =
+                                      e.target.value;
+                                    setComments([...updatedComments]);
+                                  }}
+                                  className="placeholder:text-[#666666] w-full rounded-md h-full border-[1px] border-gray-300 p-3 "
+                                />
+                                <div className="flex justify-end gap-2 items-center w-full">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCommentDelete(index)}
+                                    className="text-xs font-semibold text-[#E51010]"
+                                  >
+                                    Delete Comment
+                                  </button>
+                                </div>
+                              </div>
+                            ))
+                            .reverse()} */}
+                        </div>
+                        {/* <div className="w-full bg-red-300 min-w-full flex flex-col">
+                          <div className="">
+                            <AppTextarea
+                              placeholder="Comment...."
+                              {...register("comment")}
+                              value={mainComment}
+                              onChange={(e) => setMainComment(e.target.value)}
+                              className="placeholder:text-[#666666] w-full "
                             />
                             <div className="flex justify-end gap-2 items-center w-full">
                               <button
@@ -469,7 +550,7 @@ const SocialProofs = () => {
                                   onChange={(e) =>
                                     setMainComment(e.target.value)
                                   }
-                                  className="placeholder:text-[#666666] "
+                                  className="placeholder:text-[#666666] w-full rounded-md h-full border-[1px] border-gray-300 p-3 "
                                 />
                                 <div className="flex justify-end gap-2 items-center w-full">
                                   <button
@@ -482,7 +563,7 @@ const SocialProofs = () => {
                                 </div>
                               </div>
                             ))}
-                        </div>
+                        </div> */}
                         <div className="">
                           <TipTapEditor
                             onEditorContentChange={onEditorChange2}
@@ -582,7 +663,11 @@ const SocialProofs = () => {
         </div>
         <div className="">
           {/* {SocialProofId && ( */}
-          <AppSocialProofModal Open={openEditModal} Images={[]} />
+          <AppSocialProofModal
+            Open={openEditModal}
+            refetchSocialProofs={refetchSocialProofs}
+            Images={[]}
+          />
           {/* )} */}
         </div>
       </main>

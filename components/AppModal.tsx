@@ -2,7 +2,7 @@
 import React, { ChangeEvent, FormEvent, useState } from "react";
 import AppInput from "./AppInput";
 import APPButton from "./AppButton";
-
+import toast from "react-hot-toast";
 import { IKContext, IKImage, IKUpload } from "imagekitio-react";
 // import ImageUpload from "@/components/uploadImage";
 import {
@@ -160,10 +160,10 @@ const AppModal: React.FC<props> = ({ open, handleModalOpen }) => {
 
     const fetchOgData = async () => {
       try {
-        console.log("here in the link");
+        // console.log("here in the link");
         const response = await axios.post("/api/openGraph", { url1, url2 });
 
-        console.log("response form addmoda", response.data);
+        // console.log("respo.nse form addmoda", response.data);
         const { ogTitle, ogDescription } = response.data.data1.result;
         const { ogImage, ogUrl: linkdin } = response.data.data2.result;
         const additionalContent = {
@@ -179,6 +179,7 @@ const AppModal: React.FC<props> = ({ open, handleModalOpen }) => {
         // console.log(ogTitle, ogDescription, ogImage, linkdin);
 
         createCompany.mutate(additionalContent);
+        toast.success("Company created Successfully");
         setLoading(false);
         reset();
         onClose();
@@ -213,7 +214,7 @@ const AppModal: React.FC<props> = ({ open, handleModalOpen }) => {
       Company_LinkedIn: name.linkdin,
       Company_Logo: name.companylogo,
     };
-    console.log(additionalContent);
+    // console.log(additionalContent);
     // const additionalContent = {
     //   Company_Name: name.company,
     //   Careers_Page: name.careerURl,
@@ -227,7 +228,7 @@ const AppModal: React.FC<props> = ({ open, handleModalOpen }) => {
     axios
       .post(`/api/companies`, additionalContent)
       .then((response) => {
-        console.log("POST Response:", response);
+        // console.log("POST Response:", response);
         // Close the modal after successful submission
         // fetchData();
       })
@@ -255,7 +256,7 @@ const AppModal: React.FC<props> = ({ open, handleModalOpen }) => {
         // const imageUrl = `${uploadedImage.urlEndpoint}/${uploadedImage.folder}/${file.name}`;
 
         // console.log("Image uploaded successfully. Image URL:", imageUrl);
-        console.log("this is actual url", uploadedImage);
+        // console.log("this is actual url", uploadedImage);
         setUploadedImage(uploadedImage);
         // Handle the imageUrl as needed in your application
       } catch (error) {

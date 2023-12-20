@@ -14,11 +14,14 @@ import {
 } from "@tanstack/react-query";
 const queryClient = new QueryClient();
 import { NextUIProvider } from "@nextui-org/react";
+import toast, { Toaster } from "react-hot-toast";
+
 import MenuContextProvider from "@/context/MenuContext";
 import Sidebar from "@/components/Sidebar";
 import MainHeader from "@/components/MainHeader";
 import { CompanyProvider } from "@/context/CompanyId";
 import { SocialProofProvider } from "@/context/SocialProof";
+import { ToastBar } from "react-hot-toast";
 
 export default function RootLayout({
   children,
@@ -42,6 +45,7 @@ export default function RootLayout({
                   <MainHeader />
                 </div> */}
                       <div className="relative">{children}</div>
+                      <Toaster />
                     </div>
                   </div>
                 </MenuContextProvider>
