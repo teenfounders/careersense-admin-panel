@@ -24,9 +24,11 @@ const AppExpereinceCard = ({
           className="font-semibold text-xl leading-6 text-[#4E71DA]
 "
         >
-          {experience?.slice(0)}
+          {role}
         </h1>
-        <h2 className="text-[15px] leading-[18.5px] font-normal ">{role}</h2>
+        <h2 className="text-[15px] leading-[18.5px] font-normal ">
+          Exp Required: {experience?.slice(0)}
+        </h2>
       </div>
       <div className="flex gap-2 items-start justify-start">
         <button className="hover:scale-110" onClick={deleteExperience}>

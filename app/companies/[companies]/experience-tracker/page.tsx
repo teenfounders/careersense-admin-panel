@@ -120,7 +120,7 @@ const ExperienceTracker = (props: Props) => {
     onSettled: () =>
       queryClient.invalidateQueries({ queryKey: ["experiencecompany"] }),
     onSuccess: () => {
-      toast.success("Company deleted successfully");
+      toast.success("deleted successfully");
 
       // Invalidate and refetch the query to update the list
       setDeleteExp("");
@@ -178,6 +178,7 @@ const ExperienceTracker = (props: Props) => {
         url: "https://www.google.com/", // Replace this with the actual URL value
       };
       // console.log(formData);
+      // console.log(formData);
       setLoading(true);
       createExpereinceTracker.mutate(formData);
       toast.success("Successfully created!");
@@ -205,6 +206,7 @@ const ExperienceTracker = (props: Props) => {
     queryFn: fetchExperienceTracker,
     // enabled: false,
   });
+  // console.log(experienceCompanyByid);
 
   // React.useEffect(() => {
   //   const fetchCompanyData = async () => {
