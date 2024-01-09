@@ -25,18 +25,55 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSocialProof } from "@/context/SocialProof";
 import router from "next/router";
 import AppSocialProofModal from "@/components/AppSocialProofModal";
+import AppComment from "@/components/AppComment";
+import useNode from "../hooks/useNode";
 
 interface Comment {
   id: number;
-  text: string;
+  text?: string;
+  items: Comment[];
 }
+const commentData = {
+  id: 1,
+  items: [
+    // {
+    //   id: 2342323,
+    //   name: "hellow",
+    //   items: [
+    //     {
+    //       id: 3323232,
+    //       name: "hellow world",
+    //       items: [
+    //         {
+    //           id: 3322443,
+    //           name: "hellow world 124",
+    //           items: [],
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
+    // {
+    //   id: 2342355,
+    //   name: "Javascript",
+    //   items: [
+    //     {
+    //       id: 3323232,
+    //       name: "Javascaript typescript",
+    //       items: [],
+    //     },
+    //   ],
+    // },
+  ],
+};
+
 interface createSocialProof {
   ProofTitle: string;
   AddTags: string;
   Post: string;
   Platform: string;
   PostLink: string;
-  Comment: string[] | string;
+  Comment: Comment;
   Reality: string;
   Images: string[] | null;
 }
@@ -44,7 +81,7 @@ type FormData = {
   prooftitle: string;
 
   addtag: string;
-  comment: string[] | string;
+  comment: Comment;
   platform: string;
   postlink: string;
   reality: string;
@@ -58,6 +95,19 @@ const SocialProofs = () => {
   const [uploadedImages, setUploadedImages] = useState<
     (string | ImagekitResType)[]
   >([]);
+  const [comment, setComment] = useState<Comment>(commentData);
+  const { insertNode, deleteNode } = useNode();
+
+  const handleInsertNode = (folderId: number, item: any) => {
+    const finalStructure = insertNode(comment, folderId, item);
+    setComment(finalStructure);
+  };
+
+  const handleDeleteNode = (folderId: number) => {
+    const finalStructure = deleteNode(comment, folderId);
+    const temp = { ...finalStructure };
+    setComment(temp);
+  };
 
   // const [uploadedImages, setUploadedImages] = useState<Array<File>| string>([]);
   const {
@@ -109,34 +159,34 @@ const SocialProofs = () => {
   >("inside");
 
   const [mainComment, setMainComment] = useState<string>("");
-  const [comments, setComments] = useState<Comment[]>([]);
-  const handleComment = () => {
-    const newComment: Comment = {
-      id: comments.length + 1,
-      text: mainComment,
-    };
+  // const [comments, setComments] = useState<Comment[]>([]);/
+  // const handleComment = () => {
+  //   const newComment: Comment = {
+  //     id: comments.length + 1,
+  //     text: mainComment,
+  //   };
 
-    // Create a new array with the new comment object
-    setComments((prevComments) => [...prevComments, newComment]);
+  // Create a new array with the new comment object
+  //   setComments((prevComments) => [...prevComments, newComment]);
 
-    // Clear the input field
-    setMainComment("");
-  };
-  const handleCommentDelete = (index: number) => {
-    const updatedComments = [...comments];
-    updatedComments.splice(index, 1);
-    setComments(updatedComments);
-    // if (comments) {
-    //   const updatedComments = comments.filter((comment) => comment.id !== id);
-    //   setComments(updatedComments);
-    // }
-  };
-  const handleCommentEdit = (index: number, newText: string) => {
-    // Update the 'comments' state with the edited comment
-    const updatedComments = [...comments];
-    updatedComments[index].text = newText;
-    setComments(updatedComments);
-  };
+  //   // Clear the input field
+  //   setMainComment("");
+  // };
+  // const handleCommentDelete = (index: number) => {
+  //   const updatedComments = [...comments];
+  //   updatedComments.splice(index, 1);
+  //   setComments(updatedComments);
+  //   // if (comments) {
+  //   //   const updatedComments = comments.filter((comment) => comment.id !== id);
+  //   //   setComments(updatedComments);
+  //   // }
+  // };
+  // const handleCommentEdit = (index: number, newText: string) => {
+  //   // Update the 'comments' state with the edited comment
+  //   const updatedComments = [...comments];
+  //   updatedComments[index].text = newText;
+  //   setComments(updatedComments);
+  // };
   const fetchSocialProof = async () => {
     const response = await axios.get(`/api/social-proof`);
     return response.data; // Return the data property
@@ -159,14 +209,14 @@ const SocialProofs = () => {
       // editor2Content,
     } = data;
 
-    let additionalComments: string[] = [];
-    if (comments && comments.length > 0) {
-      additionalComments = comments.map((comment) => comment.text);
-      // console.log(additionalComments);
-    }
+    // let additionalComments: string[] = [];
+    // if (comments && comments.length > 0) {
+    //   additionalComments = comments.map((comment) => comment.text);
+    //   // console.log(additionalComments);
+    // }
 
     // Combine the main comment and additional comments into a single array
-    const allComments = [mainComment, ...additionalComments];
+    // const allComments = [mainComment, ...additionalComments];
 
     let imagess: string[] = uploadedImages.map((img: any) => img?.url);
     // console.log(imagess);
@@ -177,11 +227,12 @@ const SocialProofs = () => {
       Post: editor1Content,
       Platform: platform,
       PostLink: postlink,
-      Comment: allComments,
+      Comment: comment,
       Reality: editor2Content,
       Images: imagess,
     };
     try {
+      // console.log(formData)
       CreateSocialProof.mutate(formData);
       // If the mutation is successful, you can refetch the data
       // await refetchSocialProofs();
@@ -452,8 +503,13 @@ const SocialProofs = () => {
                           ))}
                         </div> */}
                         <div className="w-full flex flex-col ">
-                          <div className="">
-                            <AppTextarea
+                          <AppComment
+                            handleInsertNode={handleInsertNode}
+                            // handleEditNode={handleEditNode}
+                            handleDeleteNode={handleDeleteNode}
+                            comments={comment}
+                          />
+                          {/*   <AppTextarea
                               placeholder="Comment...."
                               {...register("comment")}
                               value={mainComment}
@@ -468,9 +524,9 @@ const SocialProofs = () => {
                               >
                                 Add Comment
                               </button>
-                            </div>
-                          </div>
-                          {comments
+                      </div>*/}
+
+                          {/* {comments
                             ?.map((c, index) => (
                               <div key={index} className="">
                                 <textarea
@@ -492,7 +548,7 @@ const SocialProofs = () => {
                                 </div>
                               </div>
                             ))
-                            .reverse()}
+                            .reverse()} */}
                           {/* {comments
                             ?.map((c, index) => (
                               <div key={index} className="">

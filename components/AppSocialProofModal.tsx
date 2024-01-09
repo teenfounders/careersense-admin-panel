@@ -5,6 +5,43 @@ import { dummyItems } from "@/components/Sidebar";
 import { jobcardContent } from "@/utils/postdata";
 import Link from "next/link";
 import { fetchSocialProofById } from "@/lib/action";
+
+// import { commentData } from "@/utils/postdata";
+
+const commentData = {
+  id: 1,
+  items: [
+    // {
+    //   id: 2342323,
+    //   name: "hellow",
+    //   items: [
+    //     {
+    //       id: 3323232,
+    //       name: "hellow world",
+    //       items: [
+    //         {
+    //           id: 3322443,
+    //           name: "hellow world 124",
+    //           items: [],
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
+    // {
+    //   id: 2342355,
+    //   name: "Javascript",
+    //   items: [
+    //     {
+    //       id: 3323232,
+    //       name: "Javascaript typescript",
+    //       items: [],
+    //     },
+    //   ],
+    // },
+  ],
+};
+
 import React, {
   ChangeEvent,
   useEffect,
@@ -44,16 +81,28 @@ import router from "next/router";
 import { socialproof } from "@/models/social-proof";
 import { FaClosedCaptioning } from "react-icons/fa";
 import toast from "react-hot-toast";
-interface Comment {
+import AppComment from "./AppComment";
+import useNode from "@/app/hooks/useNode";
+ 
+interface Comments {
+  id: number;
+  name?: string;
+
+  items: Comments[];
+}
+
+export interface Comment {
   id: number;
   text: string;
-  comment?: string[] | string;
+  comments?: Comments[];
 }
+
 interface createSocialProof {
   Images: string[] | null | undefined;
   Open: boolean;
   refetchSocialProofs: () => void;
 }
+
 interface updateSocialProof {
   _id?: string | null;
   ProofTitle?: string;
@@ -61,14 +110,14 @@ interface updateSocialProof {
   Post?: string;
   Platform?: string;
   PostLink?: string;
-  Comment?: string[] | null;
+  Comment?: Comments;
   Reality?: string;
   Images: string[] | undefined;
 }
 type FormData = {
   prooftitle: string;
   addtag: string;
-  comment: string[] | string;
+  comment: Comments;
   platform: string;
   postlink: string;
   reality: string;
@@ -84,6 +133,23 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
   Images,
 }) => {
   const firstInputRef = useRef<HTMLInputElement>(null);
+
+  // new comment section
+
+  const [addComment, setAddComment] = useState(false);
+  const [comments, setComments] = useState<Comments>(commentData);
+  const { insertNode, deleteNode } = useNode();
+
+  const handleInsertNode = (folderId: number, item: any) => {
+    const finalStructure = insertNode(comments, folderId, item);
+    setComments(finalStructure);
+  };
+
+  const handleDeleteNode = (folderId: number) => {
+    const finalStructure = deleteNode(comments, folderId);
+    const temp = { ...finalStructure };
+    setComments(temp);
+  };
 
   const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
   const [editor1Content, setEditor1Content] = useState("");
@@ -136,17 +202,18 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
         editor1Content: Post,
         images: Images,
       };
+      // console.log(Comment);
 
       setEditor2Content(formdata.reality);
       setEditor1Content(formdata.editor1Content);
-      const commentArray = Array.isArray(formdata.comment)
-        ? formdata.comment
-        : [formdata.comment];
-
+      // const commentArray = Array.isArray(formdata.comment)
+      //   ? formdata.comment
+      //   : [formdata.comment];
+      setComments(Comment);
       // Set comments state with API response
-      setComments(
-        commentArray.map((comment, index) => ({ id: index + 1, text: comment }))
-      );
+      // setComments(
+      // commentArray.map((comment, index) => ({ id: index + 1, text: comment }))
+      // );
       setUploadedImages(formdata.images);
       // setEditor2Content(formdata.editor2Content)
       reset(formdata);
@@ -183,7 +250,7 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
 
   const [socialProofDatas, SetSocialProofDatas] = useState<string>(""); // State to manage selected item in sidebar
 
-  const [comments, setComments] = useState<Comment[]>([]);
+  // const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(false);
 
   //set the data back from the database to the shwo the user
@@ -204,30 +271,84 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
   >("inside");
 
   const [mainComment, setMainComment] = useState<string>("");
-  const handleComment = () => {
-    const newComment: Comment = {
-      id: comments.length + 1,
-      text: mainComment,
-    };
+  // const handleComment = () => {
+  //   const newComment: Comment = {
+  //     id: comments.length + 1,
+  //     text: mainComment,
+  //     comments: [],
+  //   };
 
-    // Create a new array with the new comment object
-    setComments((prevComments) => [...prevComments, newComment]);
+  //   setComments((prevComments) => [...prevComments, newComment]);
+  //   setMainComment("");
+  // };
 
-    // Clear the input field
-    setMainComment("");
-  };
-  const handleCommentEdit = (index: number, newText: string) => {
-    // Update the 'comments' state with the edited comment
-    const updatedComments = [...comments];
-    updatedComments[index].text = newText;
-    setComments(updatedComments);
-  };
-  const handleCommentDelete = (index: number) => {
-    // Update the 'comments' state by removing the comment at the specified index
-    const updatedComments = [...comments];
-    updatedComments.splice(index, 1);
-    setComments(updatedComments);
-  };
+  // const handleCommentEdit = (commentIndex: number, newText: string) => {
+  //   // Create a copy of the current state (comments)
+  //   const updatedComments = [...comments];
+  //   // Modify the copy
+  //   updatedComments[commentIndex].text = newText;
+  //   // Set the state with the modified copy
+  //   setComments(updatedComments);
+  // };
+
+  // const handleCommentDelete = (commentIndex: number) => {
+  //   // Create a copy of the current state (comments)
+  //   const updatedComments = [...comments];
+  //   // Modify the copy
+  //   updatedComments.splice(commentIndex, 1);
+  //   // Set the state with the modified copy
+  //   setComments(updatedComments);
+  // };
+
+  // const handleReply = (commentIndex: number, replyText: string) => {
+  //   const updatedComments = [...comments];
+  //   const currentComment = updatedComments[commentIndex];
+  //   console.log(commentIndex, replyText);
+
+  //   if (!currentComment.comments) {
+  //     currentComment.comments = [];
+  //   }
+
+  //   const newReply: Reply = {
+  //     id: currentComment.comments.length + 1,
+  //     text: replyText,
+  //   };
+
+  //   currentComment.comments.push({
+  //     replies: [],
+  //   });
+
+  //   // Clear the replyText for the current comment
+
+  //   // Set the state with the modified copy
+  //   setComments(updatedComments);
+  // };
+
+  // const handleComment = () => {
+  //   const newComment: Comment = {
+  //     id: comments.length + 1,
+  //     text: mainComment,
+
+  //   };
+
+  //   // Create a new array with the new comment object
+  //   setComments((prevComments) => [...prevComments, newComment]);
+
+  //   // Clear the input field
+  //   setMainComment("");
+  // };
+  // const handleCommentEdit = (index: number, newText: string) => {
+  //   const updatedComments = [...comments];
+  //   updatedComments[index].text = newText;
+  //   setComments(updatedComments);
+  // };
+  // const handleCommentDelete = (index: number) => {
+  //   const updatedComments = [...comments];
+  //   updatedComments.splice(index, 1);
+  //   setComments(updatedComments);
+  // };
+  // Update the 'comments' state with the edited comment
+  // Update the 'comments' state by removing the comment at the specified index
   // const handleCommentDelete = (id: number) => {
   //   if (comments) {
   //     // const updatedComments = comments.filter((comment) => comment.id !== id);
@@ -337,16 +458,16 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
       // editor2Content,
     } = data;
 
-    let additionalComments: string[] = [];
-    if (comments && comments.length > 0) {
-      additionalComments = comments.map((comment) => comment.text);
-      // console.log(additionalComments);
-    }
+    // let additionalComments: string[] = [];
+    // if (comments && comments.length > 0) {
+    //   additionalComments = comments.map((comment) => comment.text);
+    //   // console.log(additionalComments);
+    // }
 
-    // Combine the main comment and additional comments into a single array
-    const allComments = [mainComment, ...additionalComments].filter(
-      (comment) => comment.trim() !== ""
-    );
+    // // Combine the main comment and additional comments into a single array
+    // const allComments = [mainComment, ...additionalComments].filter(
+    //   (comment) => comment.trim() !== ""
+    // );
 
     let imagess: string[] = uploadedImages.map((img: any) => img);
     // console.log(imagess);
@@ -358,7 +479,7 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
       Post: editor1Content,
       Platform: platform,
       PostLink: postlink,
-      Comment: allComments,
+      Comment: comments,
       Reality: editor2Content,
       Images: imagess,
     };
@@ -366,6 +487,7 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
       //   CreateSocialProof.mutate(formData);
       // If the mutation is successful, you can refetch the data
       // await refetchSocialProofs();
+      // console.log(formData);
       UpdateSocialProof.mutate(formData);
       toast.success("Post Successfully Created");
       // console.log(formData);
@@ -396,7 +518,7 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
     if (Open) {
       onOpen();
       refetchSocialProof();
-      setMainComment("");
+      // setMainComment("");
       // Trigger data fetching when modal is opened
     } else {
       onClose();
@@ -476,48 +598,40 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
                           </div>
                         </div>
                         <div className="w-full flex flex-col ">
+                          {/* {addComment ? ( */}
                           <div className="">
-                            <AppTextarea
+                            <AppComment
+                              handleInsertNode={handleInsertNode}
+                              // handleEditNode={handleEditNode}
+                              handleDeleteNode={handleDeleteNode}
+                              comments={comments}
+                            />
+                            {/* <AppTextarea
                               placeholder="Comment...."
                               {...register("comment")}
                               value={mainComment}
                               onChange={(e) => setMainComment(e.target.value)}
                               className="placeholder:text-[#666666] w-full h-full rounded-md border-[1px] border-gray-300 p-3"
-                            />
-                            <div className="flex justify-end gap-2 items-center w-full">
+                              /> */}
+                            {/* <div className="flex justify-end gap-2 items-center w-full">
                               <button
                                 type="button"
                                 onClick={() => handleComment()}
                                 className="text-xs font-semibold text-[#4E71DA]"
-                              >
-                                Add Comment
+                                >
+                                reply
                               </button>
-                            </div>
+                              <button
+                                type="button"     
+                                onClick={() => handleComment()}
+                                className="text-xs font-semibold text-[#4E71DA]"
+                                >
+                                Delete
+                              </button>
+                            </div> */}
                           </div>
-                          {comments
-                            ?.map((c, index) => (
-                              <div key={index} className="">
-                                <textarea
-                                  placeholder="Comment...."
-                                  value={c.text}
-                                  onChange={(e) =>
-                                    handleCommentEdit(index, e.target.value)
-                                  }
-                                  className="placeholder:text-[#666666] w-full rounded-md h-full border-[1px] border-gray-300 p-3 "
-                                />
-                                <div className="flex justify-end gap-2 items-center w-full">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleCommentDelete(index)}
-                                    className="text-xs font-semibold text-[#E51010]"
-                                  >
-                                    Delete Comment
-                                  </button>
-                                </div>
-                              </div>
-                            ))
-                            .reverse()}
-                          {/* {comments
+                        </div>
+                        {/* {comments
                             ?.map((c, index) => (
                               <div key={index} className="">
                                 <AppTextarea
@@ -543,7 +657,6 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
                               </div>
                             ))
                             .reverse()} */}
-                        </div>
                         <div className="">
                           <TipTapEditor
                             editorcontent={editor2Content}

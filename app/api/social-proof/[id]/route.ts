@@ -70,6 +70,7 @@ Reality,
 Images} }, // Specify the fields you want to update
       { new: true } // Return the updated document
     );
+    // console.log(Comment)
     if (updateSocialProof) {
       return new NextResponse(JSON.stringify(updateSocialProof), { status: 200 });
     } else {

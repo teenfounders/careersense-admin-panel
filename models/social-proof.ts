@@ -7,10 +7,26 @@ export interface ISocialProof extends Document {
   Post?: string;
   Platform?: string;
   PostLink?: string; // Updated to match the casing in ISocialProof
-  Comment?: string[];
+  Comment?: Comment;
   Reality?: string;
   Images?: string[];
 }
+interface Comment {
+  id: number;
+  name?: string;
+  items: Comment[];
+}
+const commentSchema = new Schema({
+  id: {
+    type: Number,
+  },
+  name: {
+    type: String,
+  },
+  items: {
+    type: Schema.Types.Mixed, // Allow any type, including nested structures
+  },
+});
 
 const socialProofSchema: Schema = new Schema({
  
@@ -30,9 +46,12 @@ const socialProofSchema: Schema = new Schema({
   PostLink: {
     type: String,
   },
-  Comment: {
-    type: [String],
+    Comment: {
+    type: commentSchema,
   },
+  // Comment: {
+  //   type: [String],
+  // },
   Reality: {
     type: String,
   },

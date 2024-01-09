@@ -192,3 +192,35 @@ export const products = [
     companyLogo: "https://ik.imagekit.io/n2ejues6y/companies/Coinbase.png",
   },
 ];
+
+
+
+export  const commentData = {
+  id: "1",
+  text: "Hello world! How are you?",
+  replies: [
+    {
+      id: "2",
+      text: "Hey, I am fine, wau?",
+      replies: [
+        {
+          id: "3",
+          text: "Hello, I am food, How are you?",
+          replies: [
+            {
+              id: "4",
+              text: "Life sucks man!",
+              replies: [
+                {
+                  id: "5",
+                  text: "Haha, I can relate :)",
+                  replies: [],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};

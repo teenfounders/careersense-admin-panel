@@ -66,3 +66,77 @@ input:invalid[data-focused='true'] ~ span{
     width: initial;
     margin: 0.9375rem calc(-0.9375rem);
 } 
+
+
+
+
+/* comment section  */
+* {
+  font-family: Monaco, sans-serif;
+}
+
+.App {
+  margin-top: 20px;
+  width: fit-content;
+}
+
+.commentContainer {
+  margin-top: 6px;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 5px 10px;
+  width: 100%;
+  border: 1px solid rgb(209 213 219);
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.commentContainer:hover {
+  background-color: #FAFAFA;
+}
+
+.inputContainer {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.inputContainer > span {
+  margin-top: 5px;
+}
+
+.inputContainer__input {
+  margin: 6px 0 0px 0;
+  padding: 5px;
+  display: flex;
+  border: 1px solid lightgray;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  border-radius: 5px;
+  background-color: #fff;
+}
+
+.first_input {
+  margin: 0;
+}
+
+.commentContainer > span {
+  margin: 0 5px;
+}
+
+.reply {
+  font-size: 12px;
+  padding: 5px;
+  border-radius: 5px;
+  color: #4e4e4e;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.comment {
+  color: #ffffff;
+  background-color: #569dff;
+  letter-spacing: 0.8px;
+}
