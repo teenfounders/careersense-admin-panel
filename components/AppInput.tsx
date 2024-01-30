@@ -33,11 +33,11 @@ export type InputProps = {
   DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
   "size"
 >;
-const sizeMap: { [key in InputSize]: string } = {
-  medium: "p-3 text-base",
-  large: "p-4 text-base",
-  small: "p-2 text-xs",
-};
+// const sizeMap: { [key in InputSize]: string } = {
+//   medium: "p-3 text-base",
+//   large: "p-4 text-sm",
+//   small: "p-2 text-xs",
+// };
 // const AppInput = forwardRef<HTMLInputElement, InputProps>(
 //   // export const AppInput: FC<InputProps> = forwardRef<HTMLInputElement, InputProps>(
 //   (
@@ -167,7 +167,7 @@ const AppInput = forwardRef<HTMLInputElement, InputProps>(
                 : "border-gray-300 focus:border-black focus:border-2"
             } focus:outline-none focus:border-black  focus:border-2 transition ease-in`,
             classname,
-            sizeMap[size]
+            // sizeMap[size]
           )}
           id={id}
           name={name}

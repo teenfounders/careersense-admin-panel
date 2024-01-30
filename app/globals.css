@@ -72,7 +72,7 @@ input:invalid[data-focused='true'] ~ span{
 
 /* comment section  */
 * {
-  font-family: Monaco, sans-serif;
+  @apply font-onest;
 }
 
 .App {
@@ -139,4 +139,9 @@ input:invalid[data-focused='true'] ~ span{
   color: #ffffff;
   background-color: #569dff;
   letter-spacing: 0.8px;
+}
+
+@font-face {
+  font-family: Onest;
+  src: url('../static/font/Onest-VariableFont_wght.ttf') format('woff2');
 }

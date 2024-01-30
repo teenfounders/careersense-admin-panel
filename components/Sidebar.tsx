@@ -12,7 +12,7 @@ import mice from "@/assets/mice.png";
 import generaladvice from "@/assets/general-advice.png";
 import logoimage from "@/assets/logoimg.png";
 import community from "@/assets/Community.svg";
-import logo from "@/assets/brand-logo-combined.svg";
+import logo from "@/assets/CAREERSENSE.svg";
 import Link from "next/link";
 import Image from "next/image";
 import bell from "@/assets/bell.svg";
@@ -40,68 +40,57 @@ const Sidebar = () => {
   const [selectedItem, setSelectedItem] = useState<string>("");
   const sidebarOptions = [
     {
-      name: "Home",
+      name: "Profile",
       href: "/",
       icon: homeimg,
       current: !segment ? true : false,
     },
+    // {
+    //   name: "About company",
+    //   href: "/about-company",
+    //   icon: job,
+    //   current: `/${segment}` == "/about-company" ? true : false,
+    // },
     {
-      name: "Jobs",
-      href: "/jobs",
+      name: "Sub Sections",
+      href: "/sub-section",
       icon: job,
-      current: `/${segment}` == "/jobs" ? true : false,
+      current: `/${segment}` == "/sub-section" ? true : false,
     },
     {
-      name: "Social Proofs",
-      href: "/social-proofs",
-      icon: events,
-      current: `/${segment}` == "/social-proofs" ? true : false,
+      name: "Skills Challenges",
+      href: "/skills-challenges",
+      icon: job,
+      current: `/${segment}` == "/skills-challenges" ? true : false,
     },
+    {
+      name: "Open-Graph Protocol",
+      href: "/open-graph",
+      icon: job,
+      current: `/${segment}` == "/open-graph" ? true : false,
+    },
+   
     {
       name: "Companies",
       href: "/companies",
       icon: company,
       current: `/${segment}` == "/companies" ? true : false,
     },
+    
     {
-      name: "Sammed",
-      href: "/me",
-      icon: homeimg,
-      current: `/${segment}` == "/me" ? true : false,
+      name: "Jobs Intel",
+      href: "/jobs-intel",
+      icon: company,
+      current: `/${segment}` == "/jobs-intel" ? true : false,
     },
+    
     // {
     //   name: "All Posts",
     //   href: "/jobs",
     //   icon: generaladvice,
     //   current: `/${segment}` == "/communities" ? true : false,
     // },
-  ];
-  // const sidebarCommunity = [
-  //   {
-  //     name: "All Post",
-  //     href: "/post",
-  //     icon: community,
-
-  //     current: `/${segment}` == "/communities" ? true : false,
-  //   },
-  //   {
-  //     name: "General Post",
-  //     href: "/communities/:id",
-  //     icon: generaladvice,
-  //   },
-  //   {
-  //     name: "Recruiter Announcements",
-  //     href: "/communities/:id",
-  //     icon: mice,
-  //   },
-  //   {
-  //     name: "Remote Work",
-  //     href: "/communitie/:id",
-  //     icon: remoteworks,
-  //   },
-
-  // ];
-  // console.log(open);
+  ]
   const handleSelectSearch = (selectedItem: string) => {
     // Do something with the selected item
     setSelectedItem(selectedItem);
@@ -120,6 +109,7 @@ const Sidebar = () => {
            w-[17.5rem]
            lg:flex
       flex-col
+    
       h-full
       shadow-2xl
       bg-white
@@ -186,17 +176,11 @@ const Sidebar = () => {
                     ? "bg-gray-100 items-center absolute left-5"
                     : // ? "bg-gray-200 border-l-4 text  border-black"
                       "",
-                  "group text-sm flex items-center justify-center font-normal leading-[130%] "
+                  "group text-base flex items-center justify-center font-normal leading-[130%] "
                 )}
                 href={option.href}
               >
-                <Image
-                  src={option.icon}
-                  width={20}
-                  className="w-6 h-6 mr-4 ml-1"
-                  height={16}
-                  alt={option.name}
-                />
+             
                 {option.name}
               </Link>
             </li>

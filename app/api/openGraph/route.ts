@@ -28,28 +28,29 @@ import ogs from "open-graph-scraper";
 //         console.error(error);
 //     // Handle database error or validation error
 //     return new NextResponse(   'Error creating experience tracker' , { status: 500 });
-//   }
+//   }  
 // };
  
 
 export const POST = async (request: NextRequest) => {
   try {
     const reqBody = await request.json();
-    const { url1, url2 } = reqBody; // Assuming the request body contains url1 and url2
+    const { url1 } = reqBody; // Assuming the request body contains url1 and url2
 
     // Fetch data from multiple URLs in parallel using Promise.all
-    const [data1, data2] = await Promise.all([
-      ogs({ url: url1, onlyGetOpenGraphInfo: true }),
-      ogs({ url: url2, onlyGetOpenGraphInfo: true }),
-    ]);
-
+    // const [data1, data2] = await Promise.all([
+    //   ogs({ url: url1, onlyGetOpenGraphInfo: true }),
+    //   ogs({ url: url2, onlyGetOpenGraphInfo: true }),
+    // ]);
+    console.log(url1)
+const data1 = await ogs({url:url1, onlyGetOpenGraphInfo: true})
     // Handle the fetched data as needed
-    console.log("Data from URL 1:", data1.result);
-    console.log("Data from URL 2:", data2.result);
+    // console.log("Data from URL 1:", data1.result);
+    // console.log("Data from URL 2:", data2.result);
 
     // Respond with success message, status code 201 (Created), and fetched data
     return new NextResponse(
-      JSON.stringify({ message: "Data fetched successfully", data1, data2 }),
+      JSON.stringify({ message: "Data fetched successfully", data1 }),
       { status: 201 }
     );
   } catch (error: any) {
