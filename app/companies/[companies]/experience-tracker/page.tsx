@@ -180,7 +180,7 @@ const ExperienceTracker = (props: Props) => {
       // console.log(formData);
       // console.log(formData);
       setLoading(true);
-      createExpereinceTracker.mutate(formData);
+      // createExpereinceTracker.mutate(formData);
       toast.success("Successfully created!");
       setLoading(false);
       onClose();
@@ -245,12 +245,13 @@ const ExperienceTracker = (props: Props) => {
       queryClient.invalidateQueries({ queryKey: ["experiencecompany"] }),
   });
   React.useEffect(() => {
-    if (isOpen) {
-    }
-    if (!isOpen) {
-      reset();
-    }
-  }, [onOpenChange, isOpen]);
+    // if (isOpen) {
+    // }
+    // if (!isOpen) {
+    //   reset();
+    // }
+  // }, [onOpenChange, isOpen]);
+  }, []);
 
   //     resetForm();
   //   }

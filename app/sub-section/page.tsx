@@ -104,7 +104,7 @@ export default function Page({ params }: { params: { companies: string } }) {
         // Assuming campusPartner corresponds to experience
         // Replace this with the actual URL value
       };
-      updateCompanyDetails.mutate(formData);
+      // updateCompanyDetails.mutate(formData);
       // const response = await axios.patch(
       //   `/api/companies/${selectedCompanyId}`,
       //   formData
@@ -142,55 +142,55 @@ export default function Page({ params }: { params: { companies: string } }) {
     //   }
     // };
   });
-  const fetchCompanyNames = async () => {
-    const response = await axios.get(`/api/companies/${selectedCompanyId}`);
-    return response.data;
-  };
-  const {
-    data: companyNamesById,
-    refetch: refetchCompanyNameById,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ["companynamesbyid"],
-    queryFn: fetchCompanyNames,
-    enabled: false,
-  });
+  // const fetchCompanyNames = async () => {
+  //   const response = await axios.get(`/api/companies/${selectedCompanyId}`);
+  //   return response.data;
+  // };
+  // const {
+  //   data: companyNamesById,
+  //   refetch: refetchCompanyNameById,
+  //   isLoading,
+  //   isError,
+  // } = useQuery({
+  //   queryKey: ["companynamesbyid"],
+  //   queryFn: fetchCompanyNames,
+  //   enabled: false,
+  // });
   // const createCompany = useMutation({
   //   mutationFn: (FormData: postCompanyInterface) =>
   //     axios.post(`/api/companies`, FormData),
   //   onSettled: () =>
   //     queryClient.invalidateQueries({ queryKey: ["companynames"] }),
   // });
-  const updateCompanyDetails = useMutation({
-    mutationFn: (formData: UpdateCompanyInterface) =>
-      axios.patch(`/api/companies/${selectedCompanyId}`, formData),
-    onSettled: () =>
-      queryClient.invalidateQueries({ queryKey: ["companynamesbyid"] }),
-  });
-  const deleteCompanyMutation = useMutation({
-    mutationFn: () => axios.delete(`/api/companies/${selectedCompanyId}`),
-    onSuccess: () => {
-      toast.success("Company deleted successfully");
-      // Invalidate and refetch the query to update the list
+  // const updateCompanyDetails = useMutation({
+  //   mutationFn: (formData: UpdateCompanyInterface) =>
+  //     axios.patch(`/api/companies/${selectedCompanyId}`, formData),
+  //   onSettled: () =>
+  //     queryClient.invalidateQueries({ queryKey: ["companynamesbyid"] }),
+  // });
+  // const deleteCompanyMutation = useMutation({
+  //   mutationFn: () => axios.delete(`/api/companies/${selectedCompanyId}`),
+  //   onSuccess: () => {
+  //     toast.success("Company deleted successfully");
+  //     // Invalidate and refetch the query to update the list
 
-      // Redirect to the home page
-      router.push("/companies");
-    },
-    onError: (error) => {
-      console.error("Error deleting company:", error);
-      toast.error("Error deleting company");
-    },
-  });
-  const handleDeleteClick = async () => {
-    if (confirm("Are you sure you want to delete this company?")) {
-      deleteCompanyMutation.mutate();
-    }
-  };
-  useEffect(() => {
-    refetchCompanyNameById();
-    reset();
-  }, [selectedCompanyId]); // Include 'id' as a dependency to re-fetch data when the 'id' changes
+  //     // Redirect to the home page
+  //     router.push("/companies");
+  //   },
+  //   onError: (error) => {
+  //     console.error("Error deleting company:", error);
+  //     toast.error("Error deleting company");
+  //   },
+  // });
+  // const handleDeleteClick = async () => {
+  //   if (confirm("Are you sure you want to delete this company?")) {
+  //     deleteCompanyMutation.mutate();
+  //   }
+  // };
+  // useEffect(() => {
+  //   refetchCompanyNameById();
+  //   reset();
+  // }, [selectedCompanyId]); // Include 'id' as a dependency to re-fetch data when the 'id' changes
 
   return (
     <>
@@ -246,7 +246,7 @@ export default function Page({ params }: { params: { companies: string } }) {
                       <APPButton
                         type={"button"}
                         loading={loading}
-                        onClick={handleDeleteClick}
+                        onClick={()=>{}}
                         text={"Delete"}
                         classname="w-20 bg-red-500 text-white"
                         forwardimage

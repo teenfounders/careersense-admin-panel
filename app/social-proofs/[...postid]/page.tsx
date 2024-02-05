@@ -27,8 +27,8 @@ export default function Page({ params }: { params: { postid: string } }) {
   useEffect(() => {
     const datas = cardData.find((d) => d.id === Number(params.postid));
     setData(datas);
-  }, []);
- console.log(data?.Comments)
+  }, [params.postid]);
+ 
   return (
     <div className=" bg-white flex flex-col grow relative w-full  h-screen overflow-y-auto">
       <header className="sticky z-20 top-0 shadow-md min-w-full justify-center items-center  flex bg-[#ffffff] border-b-[1px] border-[#dadada] min-h-[86px]  mb-0">

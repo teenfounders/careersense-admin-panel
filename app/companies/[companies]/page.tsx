@@ -188,9 +188,10 @@ export default function Page({ params }: { params: { companies: string } }) {
     }
   };
   useEffect(() => {
-    refetchCompanyNameById();
-    reset();
-  }, [selectedCompanyId]); // Include 'id' as a dependency to re-fetch data when the 'id' changes
+    // refetchCompanyNameById();
+    // reset();
+  }, []); // Include 'id' as a dependency to re-fetch data when the 'id' changes
+  // }, [selectedCompanyId]); // Include 'id' as a dependency to re-fetch data when the 'id' changes
 
   return (
     <>

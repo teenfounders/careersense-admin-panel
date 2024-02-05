@@ -164,9 +164,9 @@ const [data, setData] = useState<FormData1|null>(null);
             <div className="mb-4 gap-5 flex flex-col max-lg:mr-20 max-xl:max-w-[920px] px-5 w-full">
 
               {jobintel.map((job, index) => (
-                <div className="" onClick={()=>handleOpenModal(job.id)}>
+                <div className="" key={index} onClick={()=>handleOpenModal(job.id)}>
 
-                <JobInter key={index} {...job} />
+                <JobInter  {...job} />
                 </div>
               ))}
             </div>
