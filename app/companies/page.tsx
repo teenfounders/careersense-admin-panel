@@ -25,12 +25,14 @@ const Companies = () => {
       {/* <header className="sticky z-20 top-0 shadow-md min-w-full bg-white border-b-[1px] border-[#dadada] min-h-[86px]  mb-0"> */}
       <header className="sticky z-20 top-0 shadow-md min-w-full justify-center items-center  flex bg-[#ffffff] border-b-[1px] border-[#dadada] min-h-[86px]  mb-0">
         <ul className="flex flex-wrap absolute right-4 justify-right items-center max-w-5xl">
-          <AppModal
+        <button className="py-2 px-3 bg-blue-600 text-white rounded-xl" >add company</button>
+
+          {/* <AppModal
             open={false}
             handleModalOpen={function (): void {
               throw new Error("Function not implemented.");
             }}
-          />
+          /> */}
         </ul>
       </header>
       <main className="block relative  ">
@@ -42,7 +44,11 @@ const Companies = () => {
                 COMPANIES PROFILES
               </span>
             </div>
-
+<div className="grid grid-cols-3 items-center justify-center ">
+  <div className=" items-center text-blue-600 flex justify-center ">Google</div> 
+  <div className=" items-center flex justify-center text-blue-600 ">Adobe</div> 
+  <div className="bg-red-30 items-center flex justify-center text-blue-600 ">BlackRock</div> 
+</div>
             
             
           </div>

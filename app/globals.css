@@ -14,7 +14,7 @@
 
 body {
    padding: 0;
-   background-color: blue;
+   background-color: white;
    margin: 0;
    box-sizing: border-box;
 }
@@ -73,6 +73,7 @@ input:invalid[data-focused='true'] ~ span{
 /* comment section  */
 * {
   @apply font-onest;
+  
 }
 
 .App {
@@ -88,7 +89,7 @@ input:invalid[data-focused='true'] ~ span{
   padding: 5px 10px;
   width: 100%;
   border: 1px solid rgb(209 213 219);
-  cursor: pointer;
+  
   border-radius: 5px;
 }
 
@@ -109,11 +110,12 @@ input:invalid[data-focused='true'] ~ span{
 .inputContainer__input {
   margin: 6px 0 0px 0;
   padding: 5px;
+
   display: flex;
   border: 1px solid lightgray;
   align-items: center;
   justify-content: space-between;
-  cursor: pointer;
+
   border-radius: 5px;
   background-color: #fff;
 }
@@ -144,4 +146,18 @@ input:invalid[data-focused='true'] ~ span{
 @font-face {
   font-family: Onest;
   src: url('../static/font/Onest-VariableFont_wght.ttf') format('woff2');
+}
+
+@font-face {
+  font-family: Manrope;
+  src: url('../static/font/Manrope-VariableFont_wght.ttf') format('woff2');
+}
+@font-face {
+  font-family: Phudu;
+  src: url('../static/font/Phudu-VariableFont_wght.ttf') format('woff2');
+}
+ 
+@font-face {
+  font-family: DmSans;
+  src: url('../static/font/DMSans-VariableFont_opsz\,wght.ttf') format('woff2');
 }

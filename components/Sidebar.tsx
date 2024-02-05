@@ -84,12 +84,12 @@ const Sidebar = () => {
       current: `/${segment}` == "/jobs-intel" ? true : false,
     },
     
-    // {
-    //   name: "All Posts",
-    //   href: "/jobs",
-    //   icon: generaladvice,
-    //   current: `/${segment}` == "/communities" ? true : false,
-    // },
+    {
+      name: "Social Proof",
+      href: "/social-proofs",
+      icon: generaladvice,
+      current: `/${segment}` == "/social-proofs" ? true : false,
+    },
   ]
   const handleSelectSearch = (selectedItem: string) => {
     // Do something with the selected item

@@ -22,7 +22,7 @@ const AppComment: React.FC<AppCommentProps> = ({
 }) => {
   const [showInput, setShowInput] = useState(false);
   const [commentBody, setCommentBody] = useState("");
-
+console.log(comments)
   const handleAdd = () => {
     handleInsertNode(comments.id, commentBody);
     setCommentBody("");
@@ -54,9 +54,9 @@ const AppComment: React.FC<AppCommentProps> = ({
       >
         {comments.id === 1 ? (
           <div className="flex flex-col items-end w-full">
-            <input
-              type="text"
-              className="placeholder:text-[#666666] w-full h-full rounded-md border-[1px] border-gray-300 p-3"
+            <textarea
+             
+              className="placeholder:text-[#666666] w-full text-[15px] h-full rounded-md border-[1px] border-gray-300 p-3"
               value={commentBody}
               autoFocus
               onChange={(e) => setCommentBody(e.target.value)}
@@ -70,19 +70,19 @@ const AppComment: React.FC<AppCommentProps> = ({
           </div>
         ) : (
           <>
-            <span className=" " style={{ wordWrap: "break-word" }}>
+            <span className="text-[15px]" style={{ wordWrap: "break-word" }}>
               {comments.name}
             </span>
-            <div className="flex mt-[5px]">
+            <div className="flex gap-5 mt-[5px]">
               <Action
                 handleClick={onAddComment}
-                className="reply"
+                className="reply !text-blue-600"
                 type="REPLY"
               />
               {/* <Action handleClick={() => {}} className="reply" type="EDIT" /> */}
               <Action
                 handleClick={handleCommentDelete}
-                className="reply"
+                className="reply !text-red-600"
                 type="DELETE"
               />
             </div>
@@ -93,22 +93,25 @@ const AppComment: React.FC<AppCommentProps> = ({
       <div className="pl-[25px]">
         {showInput && (
           <div className="inputContainer">
-            <input
-              type="text"
-              className="inputContainer__input"
+            <textarea
+              
+              className="inputContainer__input text-[15px] "
               autoFocus
               placeholder="add reply.."
               onChange={(e) => setCommentBody(e.target.value)}
             />
-            <Action className="reply" type="REPLY" handleClick={handleAdd} />
+            <div className="flex gap-5">
+
+            <Action className="reply !text-blue-600" type="REPLY" handleClick={handleAdd} />
             <Action
-              className="reply"
+              className="reply !text-red-500"
               type="CANCEL"
               handleClick={() => {
                 setShowInput(false);
                 // if (!comment?.items?.length) setExpand(false);
               }}
-            />
+              />
+              </div>
           </div>
         )}
         {comments?.items?.map((cmt) => {

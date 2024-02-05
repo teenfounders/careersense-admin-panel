@@ -18,7 +18,12 @@ const config: Config = {
       },
       fontFamily: {
         'onest':['Onest'],
-        'sans':['Cambon Demi', 'Comic Sans']
+        'sans':['Cambon Demi', 'Comic Sans'],
+        'manrope':['Manrope'],
+        'phudu':['Phudu'],
+        'dmsans':['DmSans'],
+       
+     
       },
       
     },

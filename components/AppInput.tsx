@@ -161,7 +161,7 @@ const AppInput = forwardRef<HTMLInputElement, InputProps>(
         <input
           type={type}
           className={twMerge(
-            `text-base font-normal py-2 px-4 w-60 border border-gray-300 rounded ${
+            `text-base font-normal py-2 px-2   w-60 border border-gray-300 rounded ${
               errors
                 ? "border-red-500 border- ease-in-out transition-all"
                 : "border-gray-300 focus:border-black focus:border-2"
