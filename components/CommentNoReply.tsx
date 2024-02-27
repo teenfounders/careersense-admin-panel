@@ -68,9 +68,10 @@ const AppCommentNoReply: React.FC<AppCommentProps> = ({
           </div>
         ) : (
             <>
+            
             <div className="w-full font-manrope h-full bg-white  px-[30px] py-6">
-
-            <span className=""    >
+         
+            <span className="">
               {comments.name}
               
             </span>
@@ -94,6 +95,7 @@ const AppCommentNoReply: React.FC<AppCommentProps> = ({
     }
 
       <div className="pl-[25px] border-l-2 border-l-gray-300  my-10 text-start">
+        
         {showInput && (
           <div className="inputContainer">
             <input
@@ -117,12 +119,17 @@ const AppCommentNoReply: React.FC<AppCommentProps> = ({
         {comments?.items?.map((cmt) => {
      
           return (
+            <>
+                <div
+                className={`absolute -top-8 left-4 aspect-square w-[24px] border-l-2 border-b-2 rounded-bl-xl border-black h-[90px]`}
+              ></div>
             <AppCommentNoReply
               key={cmt.id}
-          
+              
               comments={cmt}
             />
       
+              </>
           );
         })}
       </div>

@@ -22,7 +22,7 @@ const AppComment: React.FC<AppCommentProps> = ({
 }) => {
   const [showInput, setShowInput] = useState(false);
   const [commentBody, setCommentBody] = useState("");
-console.log(comments)
+
   const handleAdd = () => {
     handleInsertNode(comments.id, commentBody);
     setCommentBody("");

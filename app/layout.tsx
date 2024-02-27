@@ -22,6 +22,7 @@ import MainHeader from "@/components/MainHeader";
 import { CompanyProvider } from "@/context/CompanyId";
 import { SocialProofProvider } from "@/context/SocialProof";
 import { ToastBar } from "react-hot-toast";
+import { CareerSenseProvider } from "@/context/CareerSense";
 
 export default function RootLayout({
   children,
@@ -34,8 +35,9 @@ export default function RootLayout({
         {/* <QueryClientProvider client={queryClient}> */}
         <QueryClientProvider client={queryClient}>
           <Providers>
-            <CompanyProvider>
-              <SocialProofProvider>
+            <CareerSenseProvider>
+          
+             
                 <MenuContextProvider>
                   <div className="flex  relative overflow-hidden ">
                     <Sidebar />
@@ -49,8 +51,9 @@ export default function RootLayout({
                     </div>
                   </div>
                 </MenuContextProvider>
-              </SocialProofProvider>
-            </CompanyProvider>
+           
+           
+            </CareerSenseProvider>
           </Providers>
           {/* </QueryClientProvider> */}
         </QueryClientProvider>

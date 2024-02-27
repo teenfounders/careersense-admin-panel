@@ -148,7 +148,8 @@ const TipTapEditor = ({ onEditorContentChange, editorcontent }: Props) => {
   useEffect(() => {
     if (editorcontent && editor) {
       try {
-        const jsonContentFromDatabase = JSON.stringify(editorcontent);
+        // const trimmedContent = editorcontent.replace(/\//g, '');
+        const jsonContentFromDatabase = JSON.parse(editorcontent);
         editor.commands.setContent(jsonContentFromDatabase);
       } catch (error) {
         console.error("Error setting editor content:", error);
@@ -169,25 +170,45 @@ const TipTapEditor = ({ onEditorContentChange, editorcontent }: Props) => {
 
   return (
     <div
-      className={`max-w-screen-2xl h-[270px] rounded-l-xl overflow-hidden overflow-y-auto overflow-x-hidden border-2 outline-none focus:border-blue-500 transition duration-300 ${
-        isFocused ? "border-black rounded-xl" : "border-gray-300"
-      }`}
-      onBlur={() => setIsFocused(false)}
-      onFocus={() => setIsFocused(true)}
-    >
-      <div className="flex sticky z-40 top-0">
-        {editor && <TipTapMenuBar editor={editor} />}
-      </div>
-      <div className="prose px-3">
-        {editor && (
-          <EditorContent
-            editor={editor}
-            className="prose-h-2xl min-h-15 prose-xs leading-[22px] text-[#484848] break-words font-normal text-sm"
-            onBlur={handleBlur}
-          />
-        )}
-      </div>
+    className={`max-w-screen-2xl h-[270px] rounded-l-xl overflow-hidden overflow-y-auto overflow-x-hidden border-2 outline-none focus:border-blue-500 transition duration-300 ${
+      isFocused ? "border-black rounded-xl" : "border-gray-300"
+    }`}
+    onBlur={() => setIsFocused(false)}
+    onFocus={() => setIsFocused(true)}
+  >
+    <div className="flex sticky z-40 top-0">
+      {editor && <TipTapMenuBar editor={editor} />}
     </div>
+    <div className="prose px-3">
+      {editor && (
+        <EditorContent
+          editor={editor}
+          className="prose-h-2xl min-h-15 prose-xs leading-[22px] text-[#484848] break-words font-normal text-sm"
+          onBlur={handleBlur}
+        />
+      )}
+    </div>
+  </div>
+    // <div
+    //   className={`max-w-screen-2xl h-[270px] rounded-l-xl overflow-hidden overflow-y-auto overflow-x-hidden border-2 outline-none focus:border-blue-500 transition duration-300 ${
+    //     isFocused ? "border-black rounded-xl" : "border-gray-300"
+    //   }`}
+    //   onBlur={() => setIsFocused(false)}
+    //   onFocus={() => setIsFocused(true)}
+    // >
+    //   <div className="flex sticky z-40 top-0">
+    //     {editor && <TipTapMenuBar editor={editor} />}
+    //   </div>
+    //   <div className="prose px-3">
+    //     {editor && (
+    //       <EditorContent
+    //         editor={editor}
+    //         className="prose-h-2xl min-h-15 prose-xs leading-[22px] text-[#484848] break-words font-normal text-sm"
+    //         onBlur={handleBlur}
+    //       />
+    //     )}
+    //   </div>
+    // </div>
   );
 };
 
