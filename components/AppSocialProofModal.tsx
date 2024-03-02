@@ -303,37 +303,35 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
     onSettled: () =>
       queryClient.invalidateQueries({ queryKey: ["socialProof"] }),
   });
-  const fetchSocialProof = async () => {
-    const response = await axios.get(`/api/social-proof`);
-    return response;
-  };
+ 
 
   // delete
   const handleDelete = (selectedSocialProofId?: string) => {
     if (confirm("Are you sure you want to delete this Post?")) {
-      deleteCompanyMutation.mutate();
+      deleteSocialProofMutation.mutate();
     }
   };
 
-  const deleteCompanyMutation = useMutation({
+  const deleteSocialProofMutation = useMutation({
     mutationFn: () =>
       axios.delete(`/api/social-proof/${selectedCareerSenseId}`),
     onSettled: () => {
       refetchSocialProofs();
        
-        queryClient.invalidateQueries({ queryKey: ["experiencecompany"] });
+        queryClient.invalidateQueries({ queryKey: ["socialProof"] });
     },
 
     onSuccess: () => {
-      toast.success("Company deleted successfully");
-      setOpenEditModal((prev) => prev === true && false);
+      toast.success("Proof deleted successfully");
+      editModal.onClose()
+      refetchSocialProofs()
       // Invalidate and refetch the query to update the list
 
       // Redirect to the home page
     },
     onError: (error) => {
-      console.error("Error deleting company:", error);
-      toast.error("Error deleting company");
+    
+      toast.error("Error deleting Proof");
     },
   });
   const onChange = (open: boolean) => {
@@ -386,14 +384,14 @@ const onSubmit: SubmitHandler<FormData> = async (data, events) => {
     };
      
     try {
-   console.log(formData)
+  //  console.log(formData)
       UpdateSocialProof.mutate(formData);
       toast.success("Post Successfully Created");
-  
+      editModal.onClose();
       setLoading(false);
       // onClose();
       reset();
-      editModal.onClose();
+     
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {
@@ -522,7 +520,15 @@ const onSubmit: SubmitHandler<FormData> = async (data, events) => {
             </div>
           </div>
           {/* <div className="w-full  sticky bottom-0 h-full min-w-full bg-white pt-5 py-2 z-50 flex flex-col justify-end"> */}
-          <div className=" flex w-full justify-end items-end">
+          <div className=" flex w-full justify-end gap-2 items-end">
+          <APPButton
+                        classname="flex items-center w-20  justify-center capitalize rounded-xl bg-red-600 text-white"
+                        type="button"
+                        text={"Delete"}
+                        loading={loading}
+                        onClick={() => handleDelete()}
+                        forwardimage
+                      />
             <APPButton
               classname="flex items-center w-20  justify-center capitalize rounded-xl bg-blue-600 text-white"
               type="submit"

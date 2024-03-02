@@ -75,7 +75,7 @@ export default function Page({ params }: { params: { postid: any } }) {
                 </p>
                 } */}
                 {!/<[a-z][\s\S]*>/i.test(socialProofs.PostDescription) && (
-  <p className="text-[#3F3F42] text-start text-[18px] leading-[1.6] font-[400] line-clamp-2 ">
+  <p className="text-[#3F3F42]  text-[18px] leading-[1.6] font-[400] line-clamp-2 ">
     <TipTapContent editorContent={socialProofs.PostDescription}/>
   </p>
 )}
@@ -99,10 +99,10 @@ export default function Page({ params }: { params: { postid: any } }) {
             </>
           )}
         </div>
-        <div className="w-full bg-orange-100/70    border-none  outline-none ">
+        <div className="w-full bg-orange-100/70  text-center flex  border-none  outline-none ">
           
           {socialProofs?.Lesson && 
-          <TipTapContent  editorContent={socialProofs.Lesson}/>
+          <TipTapContent className="border-none justify-center w-full items-center flex" editorContent={socialProofs.Lesson}/>
           }
           {/* <TipTapContent  editorcontent={socialProofs?.Lesson}/> */}
         </div>

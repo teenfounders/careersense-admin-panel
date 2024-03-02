@@ -205,9 +205,11 @@ const queryClient = useQueryClient();
     try {
       // console.log(formData)
       CreateSocialProof.mutate(formData);
+
       // If the mutation is successful, you can refetch the data
       // await refetchSocialProofs();
       toast.success("successfully created");
+      uploadModal.onClose();
 
       setLoading(false);
       // onClose();
@@ -522,7 +524,7 @@ const queryClient = useQueryClient();
                         image2={data.image}
                       />
                     </div>
-                  ))}
+                  )).reverse()}
                   {socialProofs.isFetching && (
                     <div>Updating in the background...</div>
                   )}

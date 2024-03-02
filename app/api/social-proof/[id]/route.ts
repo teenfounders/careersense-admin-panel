@@ -80,3 +80,31 @@ _id,
 }
 };
 
+
+export const DELETE = async (
+  request: NextRequest,
+  { params }: { params: Params }
+) => {
+  const { id } = params;
+  try {
+    await connect();
+    // console.log(id)
+    
+    // Validate the company ID format
+    if (!id) {
+      return new NextResponse('Invalid Company ID', { status: 400 });
+    }
+
+    // Delete the company from the database
+    const deletedCompany = await careersensesocialproof.findByIdAndDelete(id);
+
+    if (!deletedCompany) {
+      return new NextResponse('Social not found', { status: 404 });
+    }
+
+    return new NextResponse('Social Proof deleted successfully', { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return new NextResponse('Database Error', { status: 500 });
+  }
+};

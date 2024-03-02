@@ -31,9 +31,9 @@ const {setSelectedCareerSenseId,openEditModal,selectedCareerSenseId }= useCarrer
 const editmodal = useEditMdoal();
   // console.log(props)
   const handleEdit = (id:string|any)=>{
-    console.log('clicekd',editmodal.isOpen)
+     
     editmodal.onOpen()
-    console.log(selectedCareerSenseId)
+   
     setSelectedCareerSenseId(id)
     // try {
     //   editmodal.onOpen();
