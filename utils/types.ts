@@ -36,7 +36,17 @@ export interface ISocialProof extends Document{
 
 
 }
-
+export interface createSocialProof {
+  ProofTitle: string;
+  PostBrief:string;
+  PostDescription: string;
+  AddTags: string;
+  Platform: string;
+  PostLink: string;
+  Comment: Comment;
+  Lesson: string;
+  Images: string[] | null;
+}
    {/* _id: '655603a3f199ada232ec51af',
         ProofTitle: 'this is title',
         AddTags: 'add tags input',

@@ -50,18 +50,7 @@ import React, {
   useState,
 } from "react";
 import uploadFileToImageKit, { ImagekitResType } from "@/utils/imagekit";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  ModalProps,
-  Button,
-  useDisclosure,
-  RadioGroup,
-  Radio,
-} from "@nextui-org/react";
+import Modal from "./Modal";
 import TipTapEditor from "@/components/TipTapEditor";
 import AppInput from "@/components/AppInput";
 import AppTextarea from "@/components/AppTextarea";
@@ -83,19 +72,17 @@ import { FaClosedCaptioning } from "react-icons/fa";
 import toast from "react-hot-toast";
 import AppComment from "./AppComment";
 import useNode from "@/app/hooks/useNode";
- 
+import useEditMdoal from "@/hooks/useEditModal";
+import { useCarrerSense } from "@/context/CareerSense";
+
 interface Comments {
   id: number;
-  name?: string;
+  text?: string;
 
   items: Comments[];
 }
 
-export interface Comment {
-  id: number;
-  text: string;
-  comments?: Comments[];
-}
+ 
 
 interface createSocialProof {
   Images: string[] | null | undefined;
@@ -105,25 +92,27 @@ interface createSocialProof {
 
 interface updateSocialProof {
   _id?: string | null;
-  ProofTitle?: string;
-  AddTags?: string;
-  Post?: string;
-  Platform?: string;
-  PostLink?: string;
-  Comment?: Comments;
-  Reality?: string;
-  Images: string[] | undefined;
+  ProofTitle: string;
+  PostBrief: string;
+  PostDescription: string;
+  Tags: string;
+  Platform: string;
+  PostLink: string;
+  Comment: Comments;
+  Lesson: string;
+  Images: string[] | null | undefined 
 }
 type FormData = {
   prooftitle: string;
+  post_brief: string;
+  editor1Content: string;
   addtag: string;
-  comment: Comments;
   platform: string;
   postlink: string;
-  reality: string;
-  editor1Content: string;
-  images?: string[] | null;
+  comment: Comments;
+
   editor2Content: string;
+  images?: string[] | null;
 };
 type Props = {};
 
@@ -135,7 +124,7 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
   const firstInputRef = useRef<HTMLInputElement>(null);
 
   // new comment section
-
+  const editModal = useEditMdoal();
   const [addComment, setAddComment] = useState(false);
   const [comments, setComments] = useState<Comments>(commentData);
   const { insertNode, deleteNode } = useNode();
@@ -151,21 +140,19 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
     setComments(temp);
   };
 
-  const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
+  // const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
   const [editor1Content, setEditor1Content] = useState("");
   const [editor2Content, setEditor2Content] = useState("");
-  const [proofId, setProofId] = useState<string | "">("");
+  // const [proofId, setProofId] = useState<string | "">("");
   const {
-    selectedSocialProofId,
-    setSelectedSocialProofId,
+    selectedCareerSenseId,
+    setSelectedCareerSenseId,
     // fetchSocialProofById,
 
     openEditModal,
-    SocialProofId,
+
     setOpenEditModal,
-    setSocialProofId,
-    fetchSocialProofData,
-  } = useSocialProof();
+  } = useCarrerSense();
 
   const [uploadedImages, setUploadedImages] = useState<
     (string | ImagekitResType)[]
@@ -175,37 +162,39 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
 
   const fetchSocialProofById = async (selectedSocialProofId: any) => {
     const response = await axios.get(
-      `/api/social-proof/${selectedSocialProofId}`
+      `/api/social-proof/${selectedCareerSenseId}`
     );
 
     if (response) {
       let {
         ProofTitle,
-        AddTags,
-        Post,
+        PostBrief,
+        Tags,
+
+        PostDescription,
         Platform,
         PostLink,
         Comment,
-        Reality,
+        Lesson,
         Images,
       } = response.data;
+       
       let formdata = {
+        post_brief: PostBrief,
+
         prooftitle: ProofTitle,
 
-        addtag: AddTags,
+        addtag: Tags,
         comment: Comment,
 
         platform: Platform,
         postlink: PostLink,
-        reality: Reality,
 
-        editor1Content: Post,
-        images: Images,
+        
       };
-      // console.log(Comment);
-
-      setEditor2Content(formdata.reality);
-      setEditor1Content(formdata.editor1Content);
+      
+      setEditor1Content(PostDescription);
+      setEditor2Content(Lesson);
       // const commentArray = Array.isArray(formdata.comment)
       //   ? formdata.comment
       //   : [formdata.comment];
@@ -214,7 +203,7 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
       // setComments(
       // commentArray.map((comment, index) => ({ id: index + 1, text: comment }))
       // );
-      setUploadedImages(formdata.images);
+      setUploadedImages(Images);
       // setEditor2Content(formdata.editor2Content)
       reset(formdata);
     }
@@ -222,15 +211,16 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
     return response.data; // Assuming the data you want is in response.data
   };
   // Initial get data selected proof
+ 
   const {
     data: socialProofData,
     refetch: refetchSocialProof,
     isLoading: loadingsocial,
     isError: socialError,
   } = useQuery({
-    queryKey: ["socialProofById", selectedSocialProofId], // Pass the selectedSocialProofId as part of the query key
-    queryFn: () => fetchSocialProofById(selectedSocialProofId),
-    enabled: false,
+
+    queryKey: ["socialProofById", selectedCareerSenseId], // Pass the selectedSocialProofId as part of the query key
+    queryFn: () => fetchSocialProofById(selectedCareerSenseId),
   });
 
   const {
@@ -247,15 +237,9 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
     ImagekitResType | string[] | string | null | undefined
   >(Images);
   const queryClient = useQueryClient();
-
-  const [socialProofDatas, SetSocialProofDatas] = useState<string>(""); // State to manage selected item in sidebar
-
-  // const [comments, setComments] = useState<Comment[]>([]);
+ 
   const [loading, setLoading] = useState(false);
-
-  //set the data back from the database to the shwo the user
-  const [editor1, setEditor1] = useState("");
-
+ 
   const onEditorChange1 = (content: string) => {
     // console.log("editor1 ", content);
     setEditor1Content(content);
@@ -266,97 +250,7 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
     setEditor2Content(content);
   };
 
-  const [scrollBehavior, setScrollBehavior] = React.useState<
-    ModalProps["scrollBehavior"]
-  >("inside");
-
-  const [mainComment, setMainComment] = useState<string>("");
-  // const handleComment = () => {
-  //   const newComment: Comment = {
-  //     id: comments.length + 1,
-  //     text: mainComment,
-  //     comments: [],
-  //   };
-
-  //   setComments((prevComments) => [...prevComments, newComment]);
-  //   setMainComment("");
-  // };
-
-  // const handleCommentEdit = (commentIndex: number, newText: string) => {
-  //   // Create a copy of the current state (comments)
-  //   const updatedComments = [...comments];
-  //   // Modify the copy
-  //   updatedComments[commentIndex].text = newText;
-  //   // Set the state with the modified copy
-  //   setComments(updatedComments);
-  // };
-
-  // const handleCommentDelete = (commentIndex: number) => {
-  //   // Create a copy of the current state (comments)
-  //   const updatedComments = [...comments];
-  //   // Modify the copy
-  //   updatedComments.splice(commentIndex, 1);
-  //   // Set the state with the modified copy
-  //   setComments(updatedComments);
-  // };
-
-  // const handleReply = (commentIndex: number, replyText: string) => {
-  //   const updatedComments = [...comments];
-  //   const currentComment = updatedComments[commentIndex];
-  //   console.log(commentIndex, replyText);
-
-  //   if (!currentComment.comments) {
-  //     currentComment.comments = [];
-  //   }
-
-  //   const newReply: Reply = {
-  //     id: currentComment.comments.length + 1,
-  //     text: replyText,
-  //   };
-
-  //   currentComment.comments.push({
-  //     replies: [],
-  //   });
-
-  //   // Clear the replyText for the current comment
-
-  //   // Set the state with the modified copy
-  //   setComments(updatedComments);
-  // };
-
-  // const handleComment = () => {
-  //   const newComment: Comment = {
-  //     id: comments.length + 1,
-  //     text: mainComment,
-
-  //   };
-
-  //   // Create a new array with the new comment object
-  //   setComments((prevComments) => [...prevComments, newComment]);
-
-  //   // Clear the input field
-  //   setMainComment("");
-  // };
-  // const handleCommentEdit = (index: number, newText: string) => {
-  //   const updatedComments = [...comments];
-  //   updatedComments[index].text = newText;
-  //   setComments(updatedComments);
-  // };
-  // const handleCommentDelete = (index: number) => {
-  //   const updatedComments = [...comments];
-  //   updatedComments.splice(index, 1);
-  //   setComments(updatedComments);
-  // };
-  // Update the 'comments' state with the edited comment
-  // Update the 'comments' state by removing the comment at the specified index
-  // const handleCommentDelete = (id: number) => {
-  //   if (comments) {
-  //     // const updatedComments = comments.filter((comment) => comment.id !== id);
-  //     const updatedComments = [...comments];
-  //     updatedComments.splice(id, 1);
-  //     setComments(updatedComments);
-  //   }
-  // };
+ 
   const deleteImage = (index: number): void => {
     const updatedImages = [...uploadedImages];
     updatedImages.splice(index, 1);
@@ -391,7 +285,7 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
   };
 
   const handlemodalstate = () => {
-    setSocialProofId(undefined);
+    setSelectedCareerSenseId(null);
     setOpenEditModal((prev) => prev === true && false);
     // console.log(openEditModal);
   };
@@ -401,99 +295,103 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
   //   onSettled: () =>
   //     queryClient.invalidateQueries({ queryKey: ["socialProof"] }),
   // });
+  // console.log(selectedCareerSenseId)
   const UpdateSocialProof = useMutation({
     mutationFn: (FormData: updateSocialProof) =>
-      axios.patch(`/api/social-proof/${selectedSocialProofId}`, FormData),
+      axios.patch(`/api/social-proof/${selectedCareerSenseId}`, FormData),
+      onError:(error)=> toast.error(error.message),
     onSettled: () =>
       queryClient.invalidateQueries({ queryKey: ["socialProof"] }),
   });
-  const fetchSocialProof = async () => {
-    const response = await axios.get(`/api/social-proof`);
-    return response;
-  };
+ 
 
   // delete
   const handleDelete = (selectedSocialProofId?: string) => {
     if (confirm("Are you sure you want to delete this Post?")) {
-      deleteCompanyMutation.mutate();
+      deleteSocialProofMutation.mutate();
     }
   };
 
-  const deleteCompanyMutation = useMutation({
+  const deleteSocialProofMutation = useMutation({
     mutationFn: () =>
-      axios.delete(`/api/social-proof/${selectedSocialProofId}`),
+      axios.delete(`/api/social-proof/${selectedCareerSenseId}`),
     onSettled: () => {
       refetchSocialProofs();
-      refetchSocialProofs(),
-        queryClient.invalidateQueries({ queryKey: ["experiencecompany"] });
+       
+        queryClient.invalidateQueries({ queryKey: ["socialProof"] });
     },
 
     onSuccess: () => {
-      toast.success("Company deleted successfully");
-      setOpenEditModal((prev) => prev === true && false);
+      toast.success("Proof deleted successfully");
+      editModal.onClose()
+      refetchSocialProofs()
       // Invalidate and refetch the query to update the list
 
       // Redirect to the home page
     },
     onError: (error) => {
-      console.error("Error deleting company:", error);
-      toast.error("Error deleting company");
+    
+      toast.error("Error deleting Proof");
     },
   });
-
-  const onSubmit: SubmitHandler<FormData> = async (data, events) => {
-    events?.preventDefault();
-    setLoading(true);
+  const onChange = (open: boolean) => {
+    if (!open) {
+      reset();
+      editModal.onClose();
+    }
+  };
+ 
+const onSubmit: SubmitHandler<FormData> = async (data, events) => {
+  events?.preventDefault();
+  setLoading(true);
     // Access form data using the correct property names
-    console.table(data);
+    
     const {
       prooftitle,
-
+      post_brief,
       addtag,
-
       platform,
       postlink,
-
-      // editor1Content,
-      // editor2Content,
+      comment,
+      images,
     } = data;
-
+  
+    
     // let additionalComments: string[] = [];
     // if (comments && comments.length > 0) {
     //   additionalComments = comments.map((comment) => comment.text);
     //   // console.log(additionalComments);
     // }
-
+    
     // // Combine the main comment and additional comments into a single array
     // const allComments = [mainComment, ...additionalComments].filter(
     //   (comment) => comment.trim() !== ""
     // );
-
+    
     let imagess: string[] = uploadedImages.map((img: any) => img);
-    // console.log(imagess);
-    // console.log(editor1Content, "this is e", editor2Content);
+     
     const formData: updateSocialProof = {
-      _id: selectedSocialProofId,
+      _id: selectedCareerSenseId,
       ProofTitle: prooftitle,
-      AddTags: addtag,
-      Post: editor1Content,
+      PostBrief:post_brief,
+      Tags: addtag,
+      PostDescription: editor1Content,
       Platform: platform,
       PostLink: postlink,
       Comment: comments,
-      Reality: editor2Content,
+      Lesson: editor2Content,
       Images: imagess,
     };
+     
     try {
-      //   CreateSocialProof.mutate(formData);
-      // If the mutation is successful, you can refetch the data
-      // await refetchSocialProofs();
-      // console.log(formData);
+  //  console.log(formData)
       UpdateSocialProof.mutate(formData);
       toast.success("Post Successfully Created");
-      // console.log(formData);
+      editModal.onClose();
       setLoading(false);
-      onClose();
+      // onClose();
       reset();
+     
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {
@@ -515,196 +413,115 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
   };
 
   useEffect(() => {
-    if (Open) {
-      onOpen();
-      refetchSocialProof();
-      // setMainComment("");
-      // Trigger data fetching when modal is opened
-    } else {
-      onClose();
-    }
-  }, [Open, onOpen, onClose, refetchSocialProof]);
+    refetchSocialProof();
+  }, [Open, refetchSocialProof]);
 
   return (
     <div>
       <Modal
-        isOpen={isOpen}
-        size={"3xl"}
-        onOpenChange={onOpenChange}
-        onClose={handlemodalstate}
-        scrollBehavior={scrollBehavior}
+        title="Edit CareerSense Proof"
+        description=""
+        isOpen={editModal.isOpen}
+        onChange={onChange}
       >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                Social Proof
-              </ModalHeader>
-              <ModalBody>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                  <div className="flex flex-col gap-[10px]  ">
-                    {loadingsocial ? (
-                      // Render a loading state here, e.g., a spinner or message
-                      <div>Loading...</div>
-                    ) : (
-                      <>
-                        {" "}
-                        <div>
-                          <AppInput
-                            type="text"
-                            // defaultValue={socialProofData?.ProofTitle}
-                            label=""
-                            placeholder="Proof Title"
-                            {...register("prooftitle")} // Make sure to include this line
-                            classname="w-full  text-sm placeholder:text-sm h-[40px] tracking-[-0.015em]"
-                          />
-                        </div>
-                        <div className="w-full ">
-                          <TipTapEditor
-                            onEditorContentChange={onEditorChange1}
-                            editorcontent={editor1Content}
-                          />
-                        </div>
-                        <div>
-                          <AppInput
-                            type={"text"}
-                            // defaultValue={socialProofData?.AddTags}
-                            label={""}
-                            {...register("addtag")}
-                            classname="w-full text-sm placeholder:text-sm h-[40px] "
-                            placeholder="Add tags"
-                          />
-                        </div>
-                        <div className="flex min-will gap-2 mb-1  ">
-                          <div className="w-[33%]">
-                            <AppInput
-                              type={"text"}
-                              label={""}
-                              // defaultValue={socialProofData?.Platform}
-                              {...register("platform")}
-                              classname=" w-full text-sm placeholder:text-sm h-[40px] "
-                              placeholder="Platform"
-                            />
-                          </div>
-                          <div className="w-[66%]">
-                            <AppInput
-                              type={"text"}
-                              label={""}
-                              // defaultValue={socialProofData?.PostLink}
-                              {...register("postlink")}
-                              classname="w-full text-sm placeholder:text-sm h-[40px] "
-                              placeholder="Post Link"
-                            />
-                          </div>
-                        </div>
-                        <div className="w-full flex flex-col ">
-                          {/* {addComment ? ( */}
-                          <div className="">
-                            <AppComment
-                              handleInsertNode={handleInsertNode}
-                              // handleEditNode={handleEditNode}
-                              handleDeleteNode={handleDeleteNode}
-                              comments={comments}
-                            />
-                            {/* <AppTextarea
-                              placeholder="Comment...."
-                              {...register("comment")}
-                              value={mainComment}
-                              onChange={(e) => setMainComment(e.target.value)}
-                              className="placeholder:text-[#666666] w-full h-full rounded-md border-[1px] border-gray-300 p-3"
-                              /> */}
-                            {/* <div className="flex justify-end gap-2 items-center w-full">
-                              <button
-                                type="button"
-                                onClick={() => handleComment()}
-                                className="text-xs font-semibold text-[#4E71DA]"
-                                >
-                                reply
-                              </button>
-                              <button
-                                type="button"     
-                                onClick={() => handleComment()}
-                                className="text-xs font-semibold text-[#4E71DA]"
-                                >
-                                Delete
-                              </button>
-                            </div> */}
-                          </div>
-                        </div>
-                        {/* {comments
-                            ?.map((c, index) => (
-                              <div key={index} className="">
-                                <AppTextarea
-                                  placeholder="Comment...."
-                                  defaultValue={c.text}
-                                  onChange={(e) => {
-                                    const updatedComments = [...comments];
-                                    updatedComments[index].text =
-                                      e.target.value;
-                                    setComments([...updatedComments]);
-                                  }}
-                                  className="placeholder:text-[#666666] w-full rounded-md h-full border-[1px] border-gray-300 p-3 "
-                                />
-                                <div className="flex justify-end gap-2 items-center w-full">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleCommentDelete(index)}
-                                    className="text-xs font-semibold text-[#E51010]"
-                                  >
-                                    Delete Comment
-                                  </button>
-                                </div>
-                              </div>
-                            ))
-                            .reverse()} */}
-                        <div className="">
-                          <TipTapEditor
-                            editorcontent={editor2Content}
-                            onEditorContentChange={onEditorChange2}
-                          />
-                        </div>
-                        <div className="flex w-full py-5 items-start justify-end   gap-10">
-                          <label className="px-3 flex gap-1 py-2 text-[12.5px] text-[#666666] font-medium bg-transparent border-[1px] border-gray-300 rounded-md cursor-pointer">
-                            <span>Add</span>
-                            <span>Image</span>
-                            <input
-                              type="file"
-                              onChange={uploadAvatar}
-                              className="hidden"
-                              accept=".jpg, .jpeg, .png"
-                            />
-                          </label>
-                          <div className="flex flex-col gap-3 w-full">
-                            {uploadedImages.map((image: any, index) => (
-                              <div
-                                key={index}
-                                className="flex gap-3 items-center"
-                              >
-                                <span className="text-[12.5px]  text-black w-full overflow-x-hidden">
-                                  {image}
-                                </span>
-                                <button
-                                  className="text-red-500 text-[12.5px]"
-                                  onClick={() => deleteImage(index)}
-                                >
-                                  Delete
-                                </button>
-                              </div>
-                            ))}
-                            {errors.images && (
-                              <span className="text-red-500">
-                                {errors.images.message}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  <div className="w-full  sticky -bottom-2 h-full min-w-full bg-white pt-5 py-2 z-50 flex flex-col justify-end">
-                    <div className=" flex w-full gap-2 justify-end items-end">
-                      <APPButton
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex flex-col gap-[10px]  ">
+            {" "}
+            <div>
+              <AppInput
+                type="text"
+                label=""
+                placeholder="Proof Title"
+                {...register("prooftitle")} // Make sure to include this line
+                classname="w-full text-[15px] placeholder:text-[15px] h-[40px] tracking-[-0.015em]"
+              />
+            </div>
+            <div>
+              <textarea
+                className="placeholder:text-[#666666] w-full text-[15px] placeholder:text-[15px] h-full rounded-md border-[1px] border-gray-300 p-3"
+                placeholder="Post Brief"
+                {...register("post_brief")} // Make sure to include this line
+              />
+            </div>
+            <div className="w-full ">
+              <label className="text-[13px] ">Post description</label>
+              <TipTapEditor editorcontent={editor1Content} onEditorContentChange={onEditorChange1} />
+            </div>
+            <div>
+              <AppInput
+                type={"text"}
+                label={""}
+                {...register("addtag")}
+                classname="w-full text-[15px] placeholder:text-[15px] h-[40px] "
+                placeholder="Add tags"
+              />
+            </div>
+            <div className="flex min-will gap-2 mb-1  ">
+              <div className="w-[33%]">
+                <AppInput
+                  type={"text"}
+                  label={""}
+                  {...register("platform")}
+                  classname=" w-full text-[15px] placeholder:text-[15px] h-[40px] "
+                  placeholder="Platform"
+                />
+              </div>
+              <div className="w-[66%]">
+                <AppInput
+                  type={"text"}
+                  label={""}
+                  {...register("postlink")}
+                  classname="w-full text-[15px] placeholder:text-[15px] h-[40px] "
+                  placeholder="Post Link"
+                />
+              </div>
+            </div>
+            <div className="w-full flex flex-col ">
+              <AppComment
+                handleInsertNode={handleInsertNode}
+                // handleEditNode={handleEditNode}
+                handleDeleteNode={handleDeleteNode}
+                comments={comments}
+              />
+            </div>
+            <div className="">
+              <label className="text-[13px] ">Lesson</label>
+              <TipTapEditor editorcontent={editor2Content} onEditorContentChange={onEditorChange2}  />
+            </div>
+          </div>
+          <div className="flex w-full my-5 items-end justify-end   gap-10">
+            <label className="px-3 flex gap-1 py-2 text-[12.5px] text-[#666666] font-medium bg-transparent border-[1px] border-gray-300 rounded-md cursor-pointer">
+              <span>Add</span>
+              <span>Image</span>
+              <input
+                type="file"
+                onChange={uploadAvatar}
+                className="hidden"
+                accept=".jpg, .jpeg, .png"
+              />
+            </label>
+            <div className="flex flex-col gap-3 w-full">
+              {uploadedImages.map((image: any, index) => (
+                <div key={index} className="flex gap-3 justify-center items-center">
+                  <span className="text-[12.5px] w-full line-clamp-1 overflow-x-hidden">
+                    {image}
+                  </span>
+                  <button
+                    className="text-red-500 text-[12.5px]"
+                    onClick={() => deleteImage(index)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))}
+              {errors.images && (
+                <span className="text-red-500">{errors.images.message}</span>
+              )}
+            </div>
+          </div>
+          {/* <div className="w-full  sticky bottom-0 h-full min-w-full bg-white pt-5 py-2 z-50 flex flex-col justify-end"> */}
+          <div className=" flex w-full justify-end gap-2 items-end">
+          <APPButton
                         classname="flex items-center w-20  justify-center capitalize rounded-xl bg-red-600 text-white"
                         type="button"
                         text={"Delete"}
@@ -712,20 +529,16 @@ const AppSocialProofModal: React.FC<createSocialProof> = ({
                         onClick={() => handleDelete()}
                         forwardimage
                       />
-                      <APPButton
-                        classname="flex items-center w-20  justify-center capitalize rounded-xl bg-blue-600 text-white"
-                        type="submit"
-                        text={"Save"}
-                        loading={loading}
-                        forwardimage
-                      />
-                    </div>
-                  </div>
-                </form>
-              </ModalBody>
-            </>
-          )}
-        </ModalContent>
+            <APPButton
+              classname="flex items-center w-20  justify-center capitalize rounded-xl bg-blue-600 text-white"
+              type="submit"
+              text={"Save"}
+              loading={loading}
+              forwardimage
+            />
+          </div>
+          {/* </div> */}
+        </form>
       </Modal>
     </div>
   );

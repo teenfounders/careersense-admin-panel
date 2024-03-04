@@ -28,6 +28,6 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "components/uploadImage.tsx"
-, "app/social-proofs/[...postid]"  ],
+, "app/social-proofs/[...postid]", "app/api/social-proof/[id]"  ],
   "exclude": ["node_modules"]
 }

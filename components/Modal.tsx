@@ -50,6 +50,7 @@ const Modal: React.FC<ModalProps> = ({
         overflow-y-auto
         bg-white
         p-[25px]
+        
         focus:outline-none
         "
           >
@@ -58,6 +59,7 @@ const Modal: React.FC<ModalProps> = ({
           text-xl
           text-start
           font-bold
+        
           mb-4"
             >
               {title}
